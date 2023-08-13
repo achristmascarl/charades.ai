@@ -17,8 +17,13 @@ const GuessResult = memo(function GuessResult({ index, guesses, answer, processi
       )}
     >
       {!(processingGuess && currentlyProcessing) && guess && (
-        <div className="w-full h-full flex flex-row items-center justify-between sm:text-base text-sm">
-          {guess.guessString}
+        <div className="w-full h-full flex flex-col items-center justify-between sm:text-base text-sm">
+          <div>
+           {guess.guessString}
+          </div>
+          <div>
+            {guess.guessEmojis}
+          </div>
         </div>
       )}
     </div>

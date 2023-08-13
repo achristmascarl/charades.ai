@@ -4,7 +4,6 @@ import Image from 'next/future/image';
 import dynamic from 'next/dynamic';
 
 import { MongoClient } from 'mongodb'
-import Select, { components } from 'react-select';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 import { c, track } from '../utils';
@@ -69,11 +68,18 @@ export async function getStaticProps(context) {
   }
 }
 const numGuesses = 5;
-const GuessStates = {
-  Earlier: 'Too young',
-  Later: 'Too old',
-  SameYear: 'Same age',
-  Correct: 'Correct',
+const LetterStates = {
+  NotPresent: "NotPresent",
+  WrongSpot0: "WrongSpot0",
+  WrongSpot1: "WrongSpot1",
+  WrongSpot2: "WrongSpot2",
+  WrongSpot3: "WrongSpot3",
+  WrongSpot4: "WrongSpot4",
+  CorrectSpot0: "CorrectSpot0",
+  CorrectSpot1: "CorrectSpot1",
+  CorrectSpot2: "CorrectSpot2",
+  CorrectSpot3: "CorrectSpot3",
+  CorrectSpot4: "CorrectSpot4"
 };
 const GuessEmojis = {
   Earlier: '⏪',
@@ -87,11 +93,11 @@ const modalIDs = {
   None: 'None',
 }
 const referralParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
-const answerParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=answer_website";
 
 export default function Home({ charadeIndex, answerString, charadeId }) {
   const [guess, setGuess] = useState("");
   const [feedbackEmojis, setFeedbackEmojis] = useState("");
+  const [letterDict, setLetterDict] = useState({});
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
@@ -99,6 +105,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
   const [shareString, setShareString] = useState(`charades.ai round ${charadeIndex} \n`);
   const [processingGuess, setProcessingGuess] = useState(false);
+
+  const answerArray = answerString.split("");
 
   // get game state from localStorage upon render
   useEffect(() => {
@@ -108,17 +116,21 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       setGuesses(parsedGameState.guesses);
       setGameFinished(parsedGameState.gameFinished);
       setGameWon(parsedGameState.gameWon);
+      generateLetterDict(parsedGameState.guesses);
       if (parsedGameState.gameFinished) {
         setModalOpenId(modalIDs.GameFinished);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charadeIndex]);
 
   // save game when guesses change
   useEffect(() => {
     if (guesses.length > 0) {
       saveGame();
+      generateLetterDict(guesses);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guesses]);
 
   // check to see if the game is finished
@@ -134,6 +146,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameFinished, gameWon]);
 
   function updateShareString(gameWon) {
@@ -166,11 +179,18 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   useEffect(() => {
     let feedbackEmojiString = "";
     for (let i = 0; i < guess.length; i++) {
-      feedbackEmojiString += "⬜"
+      if (letterDict[guess.charAt(i)] === LetterStates[`CorrectSpot${i}`]) {
+        feedbackEmojiString += "🟩";
+      } else if (letterDict[guess.charAt(i)] === LetterStates[`WrongSpot${i}`]) {
+        feedbackEmojiString += "🟨";
+      } else if (letterDict[guess.charAt(i)] === LetterStates.NotPresent) {
+        feedbackEmojiString += "❌";
+      } else {
+        feedbackEmojiString += "⬜"
+      }
     }
     setFeedbackEmojis(feedbackEmojiString);
-    // return "⬜⬜⬜⬜";
-    // "🟨🟩"
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guess]);
 
   function processInput(e) {
@@ -185,12 +205,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   function handleGuess() {
     setProcessingGuess(true);
     const addingNewGuess = Array.from(guesses);
-    let guessState;
-    let guessEmoji;
     track(`guessed_${guess}`, "game_state", `guess_${addingNewGuess.length + 1}_${guess}`);
     if (guess.toString() === answerString) {
-      guessState = GuessStates.Correct;
-      guessEmoji = GuessEmojis.Correct;
       setGameWon(true);
       setGameFinished(true);
       track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
@@ -199,17 +215,38 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }
     addingNewGuess.push({
       guessString: guess.toString(),
-      guessState: guessState,
-      emoji: guessEmoji,
+      guessEmojis: feedbackEmojis,
     });
     if (addingNewGuess.length === numGuesses) {
       setGameFinished(true);
-      track("game_lost", "game_state", "game_lost");
+      if (!(guess.toString() === answerString)){
+        track("game_lost", "game_state", "game_lost");
+      }
     }
     setGuesses(addingNewGuess);
     setGuess("");
     saveGame();
     setTimeout(() => setProcessingGuess(false), 750);
+  }
+
+  function generateLetterDict(guesses) {
+    const newLetterDict = {};
+    for (let i = 0; i < guesses.length; i++) {
+      const guess = guesses[i];
+      for (let j = 0; j < guess.length; j++) {
+        const letter = guess.charAt(j);
+        let letterState = LetterStates.NotPresent;
+        if (answerArray.includes(letter)) {
+          letterState = LetterStates[`WrongSpot${j}`];
+        }
+        if (answerArray[j] === letter) {
+          letterState = LetterStates[`CorrectSpot${j}`]
+        }
+        newLetterDict[letter] = letterState;
+      }
+    }
+    setLetterDict(newLetterDict);
+    console.log(newLetterDict);
   }
 
   function handleShareResults() {
@@ -228,7 +265,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           href={
             'data:image/svg+xml,' +
             '<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22>' +
-            `<text y=%22.9em%22 font-size=%2290%22>🧐</text>` +
+            `<text y=%22.9em%22 font-size=%2290%22>🎭</text>` +
             '</svg>'
           }
         />
@@ -346,17 +383,23 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             />
             <button
               className="btn ml-3"
-              disabled={guess.length < 1 || gameFinished || processingGuess}
+              disabled={guess.length < 1 || guess.length !== 5 || gameFinished || processingGuess}
               onClick={handleGuess}
             >👈 Guess</button>
           </div>
-          <p className="ml-4 mt-1 text-left">
-            {feedbackEmojis} (<span
-              className="hover:underline text-blue-500 cursor-pointer"
-            >
-              What&apos;s this?
-            </span>)
-          </p>
+          { guess && guess.length > 0 && 
+            <p className="ml-4 mt-1 text-left">
+              {feedbackEmojis} (<span
+                className="hover:underline text-blue-500 cursor-pointer"
+                onClick={() => {
+                  setModalOpenId(modalIDs.Help);
+                  track("click_whats_this", "button_click", "help");
+                }}
+              >
+                What&apos;s this?
+              </span>)
+            </p>
+          }
         </div>
         <div className="max-w-xl sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
@@ -470,12 +513,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </h4>
             <GuessResult
               index={0}
-              guesses={[{
-                name: "Apple",
-                iconUrl: "https://foundle.s3.amazonaws.com/icons/apple-icon.png",
-                guessState: GuessStates.Later,
-                emoji: GuessEmojis.Later,
-              }]}
+              guesses={["Apple"]}
               processingGuess={false}
             />
             <p className="py-2">
@@ -484,12 +522,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </p>
             <GuessResult
               index={0}
-              guesses={[{
-                name: "JD.com",
-                iconUrl: "https://foundle.s3.amazonaws.com/icon/3767cfcb-d264-43cd-9f62-c8ddaeb65741.png",
-                guessState: GuessStates.SameYear,
-                emoji: GuessEmojis.SameYear,
-              }]}
+              guesses={["JD.com"]}
               processingGuess={false}
             />
             <p className="py-2">
@@ -498,12 +531,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </p>
             <GuessResult
               index={0}
-              guesses={[{
-                name: "Google",
-                iconUrl: "https://foundle.s3.amazonaws.com/icons/google-icon.png",
-                guessState: GuessStates.Correct,
-                emoji: GuessEmojis.Correct,
-              }]}
+              guesses={["Google"]}
               processingGuess={false}
             />
             <p className="py-2">
