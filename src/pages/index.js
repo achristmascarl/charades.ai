@@ -7,24 +7,20 @@ import { MongoClient } from 'mongodb'
 import Select, { components } from 'react-select';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-import { c, track, companies } from '../utils';
+import { c, track } from '../utils';
 import GuessResult from '../components/GuessResult';
-import FoundleCountdown from '../components/FoundleCountdown';
+import CharadeCountdown from '../components/CharadeCountdown';
 import { placeholderSquareTinyBase64 } from '../../public/blurImages';
 // import styles from '../styles/Home.module.css';
 
-const ReactViewer = dynamic(
-  () => import('react-viewer'),
-  { ssr: false }
-);
-
 export async function getStaticProps(context) {
-  let foundleId = "0";
-  let answerIndex = 0;
-  let slideIndex = 0;
+  let charadeIndex = "0";
+  let answerString = "";
+  let charadeId = "";
   let client;
 
   let url = process.env.MONGO_URL;
+  console.log(url);
   if (!url) {
     throw new Error(
       'MONGO_URL environment variable undefined; did you prepend `railway run`?'
@@ -32,30 +28,26 @@ export async function getStaticProps(context) {
   }
   try {
     client = await MongoClient.connect(url);
-    const database = client.db("test");
-    const foundles = database.collection("foundles");
-    // console.log(foundles);
+    const database = client.db("production");
+    const charades = database.collection("charades");
+
+    // get charade for today
     const date = new Date(Date.now());
     date.setUTCHours(date.getUTCHours() - 4);
     const utcString = date.toUTCString();
     const utcDateId = utcString.split(' ').slice(1, 4).join('-');
     const query = { utcDateId: utcDateId };
     console.log(query);
-    const foundle = await foundles.findOne(query);
-    console.log(foundle);
-    if (foundle) {
-      if (foundle.foundleId) {
-        foundleId = foundle.foundleId;
+    const charade = await charades.findOne(query);
+    console.log(charade);
+    if (charade) {
+      charadeId = charade._id.toString();
+      console.log(charadeId);
+      if (charade.charadeIndex) {
+        charadeIndex = charade.charadeIndex;
       }
-      if (foundle.answerIndex && foundle.answerIndex < companies.length) {
-        answerIndex = foundle.answerIndex;
-      }
-      if (
-        foundle.slideIndex &&
-        foundle.answerIndex < companies.length &&
-        foundle.slideIndex < companies[foundle.answerIndex].slidesUrls
-      ) {
-        slideIndex = foundle.slideIndex;
+      if (charade.answer && charade.answer.toString().length > 0) {
+        answerString = charade.answer.toString().toLowerCase();
       }
     }
 
@@ -69,14 +61,14 @@ export async function getStaticProps(context) {
 
   return {
     props: {
-      foundleId,
-      answerIndex,
-      slideIndex,
+      charadeIndex,
+      answerString,      
+      charadeId,
     },
     revalidate: 60,
   }
 }
-const numGuesses = 6;
+const numGuesses = 5;
 const GuessStates = {
   Earlier: 'Too young',
   Later: 'Too old',
@@ -94,53 +86,23 @@ const modalIDs = {
   Help: 'Help',
   None: 'None',
 }
-const referralParams = "utm_source=foundle&utm_medium=referral&utm_campaign=page_links";
-const answerParams = "utm_source=foundle&utm_medium=referral&utm_campaign=answer_website";
-// const sponsorParams = "utm_source=foundle&utm_medium=paid&utm_campaign=foundle_sponsorship";
+const referralParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
+const answerParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=answer_website";
 
-const Option = ({ children, ...props }) => {
-  return (
-    <components.Option
-      {...props}
-      className="!flex flex-row justify-start align-middle"
-    >
-      <div
-        className='w-6 h-6'
-      >
-        <Image
-          src={props.data.iconUrl}
-          placeholder="blur"
-          blurDataURL={placeholderSquareTinyBase64}
-          alt="icon"
-          width="24"
-          height="24"
-          sizes="100vw"
-          style={{ width: '100%', height: 'auto' }}
-        />
-      </div>
-      <div
-        className="flex-grow text-center"
-      >
-        {children}
-      </div>
-    </components.Option>
-  );
-};
-
-export default function Home({ foundleId, answerIndex, slideIndex }) {
-  const [slideViewerVisible, setSlideViewerVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+export default function Home({ charadeIndex, answerString, charadeId }) {
+  const [guess, setGuess] = useState("");
+  const [feedbackEmojis, setFeedbackEmojis] = useState("");
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
-  const [shareString, setShareString] = useState(`foundle # ${foundleId} \n`);
+  const [shareString, setShareString] = useState(`charades.ai round ${charadeIndex} \n`);
   const [processingGuess, setProcessingGuess] = useState(false);
 
   // get game state from localStorage upon render
   useEffect(() => {
-    const savedGameState = localStorage.getItem(`foundle-${foundleId}`);
+    const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
     if (savedGameState) {
       const parsedGameState = JSON.parse(savedGameState);
       setGuesses(parsedGameState.guesses);
@@ -150,7 +112,7 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
         setModalOpenId(modalIDs.GameFinished);
       }
     }
-  }, []);
+  }, [charadeIndex]);
 
   // save game when guesses change
   useEffect(() => {
@@ -188,17 +150,36 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
         updatingShareString += `${guesses[i].emoji}`;
       }
     }
-    updatingShareString += ' \nfoundle.io';
+    updatingShareString += ' \ncharades.ai';
     setShareString(updatingShareString);
   }
 
   // save game state to localStorage
   function saveGame() {
-    localStorage.setItem(`foundle-${foundleId}`, JSON.stringify({
+    localStorage.setItem(`charades-${charadeIndex}`, JSON.stringify({
       guesses: guesses,
       gameFinished: gameFinished,
       gameWon: gameWon,
     }))
+  }
+
+  useEffect(() => {
+    let feedbackEmojiString = "";
+    for (let i = 0; i < guess.length; i++) {
+      feedbackEmojiString += "⬜"
+    }
+    setFeedbackEmojis(feedbackEmojiString);
+    // return "⬜⬜⬜⬜";
+    // "🟨🟩"
+  }, [guess]);
+
+  function processInput(e) {
+    if (
+      e.target.value.length <= 5 &&
+      /^[a-zA-Z]*$/.test(e.target.value)
+    ) {
+      setGuess((e.target.value).toLowerCase());
+    }
   }
 
   function handleGuess() {
@@ -206,31 +187,18 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
     const addingNewGuess = Array.from(guesses);
     let guessState;
     let guessEmoji;
-    const correctFoundingYear = companies[answerIndex].foundingYear;
-    const guessFoundingYear = selectedOption.foundingYear;
-    track(`guessed_${selectedOption.name}`, "game_state", `guess_${addingNewGuess.length + 1}_${selectedOption.name}`);
-    if (selectedOption.index === answerIndex) {
+    track(`guessed_${guess}`, "game_state", `guess_${addingNewGuess.length + 1}_${guess}`);
+    if (guess.toString() === answerString) {
       guessState = GuessStates.Correct;
       guessEmoji = GuessEmojis.Correct;
       setGameWon(true);
       setGameFinished(true);
       track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
-    } else if (guessFoundingYear === correctFoundingYear) {
-      guessState = GuessStates.SameYear;
-      guessEmoji = GuessEmojis.SameYear;
-      track("guessed_same_year", "game_state", `guess_${addingNewGuess.length + 1}_same_year`);
-    } else if (guessFoundingYear < correctFoundingYear) {
-      guessState = GuessStates.Later;
-      guessEmoji = GuessEmojis.Later;
-      track("guessed_older", "game_state", `guess_${addingNewGuess.length + 1}_older`);
     } else {
-      guessState = GuessStates.Earlier;
-      guessEmoji = GuessEmojis.Earlier;
-      track("guessed_younger", "game_state", `guess_${addingNewGuess.length + 1}_younger`);
+      track("guessed_wrong", "game_state", `guess_${addingNewGuess.length + 1}`);
     }
     addingNewGuess.push({
-      name: selectedOption.name,
-      iconUrl: selectedOption.iconUrl,
+      guessString: guess.toString(),
       guessState: guessState,
       emoji: guessEmoji,
     });
@@ -239,13 +207,12 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
       track("game_lost", "game_state", "game_lost");
     }
     setGuesses(addingNewGuess);
-    setSelectedOption(null);
+    setGuess("");
     saveGame();
     setTimeout(() => setProcessingGuess(false), 750);
   }
 
   function handleShareResults() {
-    // navigator.clipboard.writeText(shareString);
     setShowCopiedAlert(true);
     setTimeout(() => {
       setShowCopiedAlert(false);
@@ -265,14 +232,14 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
             '</svg>'
           }
         />
-        <title>foundle</title>
+        <title>charades.ai</title>
         <meta
           name="og:title"
-          content="foundle"
+          content="charades.ai"
         />
         <meta
           name="description"
-          content="guess the company whose pitch deck the slide belongs to"
+          content="charades with ai"
         />
         <meta
           property="og:image"
@@ -292,18 +259,18 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
             </div>
           )}
         </div>
-        {foundleId === "0" && (
+        {charadeIndex === "0" && (
           <div className="alert alert-warning shadow-lg mb-5 text-center">
             <span>
-              foundle is currently on hiatus, so you may have already
-              seen the slide below. if you&apos;d like to see foundle
+              charades.ai is currently on hiatus, so you may have already
+              seen the image below. if you&apos;d like to see charades.ai
               return, let us know by reaching out to chirp@birbstreet.com!
             </span>
           </div>
         )}
         <div className="max-w-5xl mx-auto text-center">
           <div className="flex flex-row justify-center align-middle mb-1">
-            <h1 className="text-3xl font-semibold">🧐 foundle</h1>
+            <h1 className="text-3xl font-semibold">🎭 charades.ai</h1>
             <div className="tooltip tooltip-right" data-tip="Help">
               <button
                 className="btn btn-circle ml-2 h-8 w-8 min-h-0 my-auto"
@@ -325,21 +292,18 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
             {gameFinished ? (
               <>
                 {gameWon ? (
-                  `🎉 you won! the pitch deck slide was from `
+                  `🎉 you won! the answer was `
                 ) : (
-                  `maybe next time 😢 the pitch deck slide belongs to `
+                  `maybe next time 😢 the answer was `
                 )}
-                <a
-                  href={`${companies[answerIndex].websiteUrl}?${answerParams}`}
-                  target="_blank"
-                  rel="noreferrer"
+                <p
                   className="text-blue-500"
                 >
-                  {companies[answerIndex].name}
-                </a>
+                  {answerString}
+                </p>
               </>
             ) : (
-              "guess which company's pitch deck this slide is from!"
+              "guess the prompt that ai used to generate this image!"
             )}
           </h3>
           {gameFinished && (
@@ -350,7 +314,6 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
               >
                 <button
                   className="btn mx-2 my-3"
-                // onClick={handleShareResults}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
                     <path fillRule="evenodd" d="M15.75 4.5a3 3 0 11.825 2.066l-8.421 4.679a3.002 3.002 0 010 1.51l8.421 4.679a3 3 0 11-.729 1.31l-8.421-4.678a3 3 0 110-4.132l8.421-4.679a3 3 0 01-.096-.755z" clipRule="evenodd" />
@@ -358,92 +321,58 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
                   Share Results
                 </button>
               </CopyToClipboard>
-              <button
-                className="btn mx-2 my-3"
-                onClick={() => setModalOpenId(modalIDs.GameFinished)}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
-                  <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 01.67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 11-.671-1.34l.041-.022zM12 9a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
-                </svg>
-                Fun Facts
-              </button>
             </>
           )}
           <Image
-            src={companies[answerIndex].slideUrls[slideIndex]}
+            src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`}
             placeholder="blur"
             blurDataURL={placeholderSquareTinyBase64}
-            alt="slide deck image"
-            width="300"
+            alt="ai-generated image"
+            width="200"
             height="200"
             sizes="100vw"
-            style={{ width: '100%', height: 'auto', cursor: 'zoom-in' }}
-            onClick={() => setSlideViewerVisible(true)}
+            style={{ width: '100%', height: 'auto' }}
           />
         </div>
         <div className="max-w-lg sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
-          <h3 className="py-3 text-lg">
-            {gameFinished ? (
-              "tune in tomorrow for a new game :)"
-            ) : (
-              "select a company"
-            )}
-          </h3>
-          <Select
-            defaultValue={null}
-            value={selectedOption}
-            onChange={setSelectedOption}
-            components={{ Option }}
-            options={
-              companies.map((company, index) => ({
-                value: company.name,
-                label: company.name,
-                index: index,
-                name: company.name,
-                websiteUrl: company.websiteUrl,
-                iconUrl: company.iconUrl,
-                facts: company.facts,
-                foundingYear: company.foundingYear,
-              }))}
-            isClearable={true}
-            instanceId="foundle-answer-select"
-          />
-          <button
-            className="btn mx-auto my-3"
-            disabled={!selectedOption || gameFinished || processingGuess}
-            onClick={handleGuess}
-          >👆 Guess</button>
+          <div className="flex flex-row content-center justify-between">
+            <input
+              type="text"
+              placeholder="Type guess here"
+              className="input input-bordered w-full font-mono tracking-[.45em]"
+              onChange={(e) => processInput(e)}
+              value={guess}
+              maxLength={5}
+            />
+            <button
+              className="btn ml-3"
+              disabled={guess.length < 1 || gameFinished || processingGuess}
+              onClick={handleGuess}
+            >👈 Guess</button>
+          </div>
+          <p className="ml-4 mt-1 text-left">
+            {feedbackEmojis} (<span
+              className="hover:underline text-blue-500 cursor-pointer"
+            >
+              What&apos;s this?
+            </span>)
+          </p>
         </div>
         <div className="max-w-xl sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
           {[...Array(numGuesses)].map((x, i) =>
-            <GuessResult key={i} index={i} guesses={guesses} processingGuess={processingGuess} />
+            <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} />
           )}
         </div>
         <div className="divider"></div>
         <p className="p-0 text-center">
-          created by carl from <a
+          created by 🐦 at <a
             href={`https://www.birbstreet.com/?${referralParams}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-500"
-          >birb street</a> with
-          contributions from <a
-            href="https://twitter.com/chrischerian"
-            target="_blank"
-            rel="noreferrer"
-            className="text-blue-500"
-          >chris cherian</a>.
+          >birb street</a>.
         </p>
-        <ReactViewer
-          visible={slideViewerVisible}
-          onClose={() => setSlideViewerVisible(false)}
-          onMaskClick={() => setSlideViewerVisible(false)}
-          images={[{ src: companies[answerIndex].slideUrls[slideIndex], alt: 'slide deck image' }]}
-          attribute={false}
-          noNavbar={true}
-          changeable={false}
-        />
         <input
           type="checkbox"
           id="game-finished-modal"
@@ -471,26 +400,9 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
               )}
             </h3>
             <p className="py-4">
-              the answer was <a
-                href={`${companies[answerIndex].websiteUrl}?${answerParams}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500"
-              >
-                {companies[answerIndex].name}
-              </a>.
+              the answer was <b>{answerString}</b>.
             </p>
-            <h4 className="text-base font-semibold">
-              fun facts:
-            </h4>
-            {companies[answerIndex].facts.map((fact, index) => {
-              return (
-                <p key={index} className="ml-2 my-2">
-                  {fact}
-                </p>
-              )
-            })}
-            <p className="py-4">time until next foundle: <FoundleCountdown /></p>
+            <p className="py-4">time until next round of charades: <CharadeCountdown /></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
                 text={shareString}
@@ -498,7 +410,6 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
               >
                 <button
                   className="btn mx-auto my-3"
-                // onClick={handleShareResults}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
                     <path fillRule="evenodd" d="M15.75 4.5a3 3 0 11.825 2.066l-8.421 4.679a3.002 3.002 0 010 1.51l8.421 4.679a3 3 0 11-.729 1.31l-8.421-4.678a3 3 0 110-4.132l8.421-4.679a3 3 0 01-.096-.755z" clipRule="evenodd" />
@@ -508,7 +419,7 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
               </CopyToClipboard>
               <a
                 className="btn mx-auto my-3"
-                href="mailto:chirp@birbstreet.com?subject=foundle%20feedback"
+                href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -544,7 +455,7 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
             </h3>
             <div className="divider my-0"></div>
             <p className="py-2">
-              You have 6 chances to guess the company whose slide deck
+              You have {numGuesses} chances to guess the company whose slide deck
               is displayed.
             </p>
             <p className="py-2">
@@ -601,7 +512,7 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
             </p>
             <div className="divider my-0"></div>
             <p className="py-2">
-              A new foundle will be available every 24 hours around
+              A new round of charades will be available every 24 hours around
               midnight UTC-4.
             </p>
             <div className="divider my-0"></div>
@@ -609,27 +520,16 @@ export default function Home({ foundleId, answerIndex, slideIndex }) {
               disclaimers
             </h4>
             <p className="py-2">
-              The information used for the foundles is based on research
-              across sources like Wikipedia, Crunchbase, and Google Images.
-              Please let us know if any of the information or attributions
-              are incorrect!
-            </p>
-            <p className="py-2">
-              foundle was inspired by Wordle (created by <a
+              charades.ai was inspired by Wordle (created by <a
                 href="https://twitter.com/powerlanguish"
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-500"
-              >Josh Wardle</a>) and also Tradle (created by <a
-                href="https://twitter.com/ximoes"
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-500"
-              >@xiomoes</a>).
+              >Josh Wardle</a>) and, of course, charades.
             </p>
             <a
               className="btn mx-auto my-3"
-              href="mailto:chirp@birbstreet.com?subject=foundle%20feedback"
+              href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
               target="_blank"
               rel="noreferrer"
             >

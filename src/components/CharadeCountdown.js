@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function FoundleCountdown() {
+export default function CharadeCountdown() {
   const [countdownString, setCountdownString] = useState("--:--:--");
 
   // get countdown clock

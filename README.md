@@ -1,6 +1,6 @@
 # 🎭 charades.ai
 
-charades with ai: guess the prompt for the ai-generated image
+charades with ai: guess the prompt for the ai-generated image. inspired by wordle.
 
 ## getting start with railway cli
 

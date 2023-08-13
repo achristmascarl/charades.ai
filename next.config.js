@@ -8,7 +8,7 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: [
-      'foundle.s3.amazonaws.com',
+      's3.us-east-2.amazonaws.com',
     ],
     unoptimized: true,
   },

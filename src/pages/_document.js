@@ -15,7 +15,7 @@ class MyDocument extends Document {
         <body>
           {/* <!-- Google tag (gtag.js) --> */}
           <Script
-            src="https://www.googletagmanager.com/gtag/js?id=G-FM7H81ZCLW"
+            src="https://www.googletagmanager.com/gtag/js?id=G-7FQ20LPMKC"
             strategy="afterInteractive"
           />
           <Script id="google-analytics" strategy="afterInteractive">
@@ -24,7 +24,7 @@ class MyDocument extends Document {
               function gtag(){window.dataLayer.push(arguments);}
               gtag('js', new Date());
 
-              gtag('config', 'G-FM7H81ZCLW');
+              gtag('config', 'G-7FQ20LPMKC');
             `}
           </Script>
           <Main />
