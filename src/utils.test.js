@@ -1,38 +1,32 @@
-import { companies } from './utils';
-import { MongoClient } from 'mongodb';
+import { wordList } from "./utils";
+import { MongoClient } from "mongodb";
+import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
 
-test('companies exist', () => {
-  expect(companies).toBeTruthy();
-  expect(companies.length).toBeGreaterThan(0);
+test("word list exists", () => {
+  expect(wordList).toBeTruthy();
+  expect(wordList.length).toBeGreaterThan(0);
 });
 
-test('companies basic data valid', () => {
-  companies.forEach(company => {
-    expect(company.name).toBeTruthy();
-    expect(company.name.length).toBeGreaterThan(0);
-    expect(company.websiteUrl).toBeTruthy();
-    expect(company.websiteUrl.length).toBeGreaterThan(0);
-    expect(company.iconUrl).toBeTruthy();
-    expect(company.iconUrl.length).toBeGreaterThan(0);
-    expect(company.foundingYear).toBeTruthy();
-    expect(company.foundingYear).toBeGreaterThan(1800);
+test("word list is all 5-letter words", () => {
+  wordList.forEach(word => {
+    expect(word.length).toBe(5);
   });
 });
 
-describe("today's and next 6 foundles valid", () => {
+describe("today's and next 6 rounds of charades valid", () => {
   let url;
   let client;
   let database;
-  let foundles;
+  let charades;
 
   beforeAll(async () => {
     url = process.env.MONGO_URL;
     expect(url).toBeTruthy();
     client = await MongoClient.connect(url);
     expect(client).toBeTruthy();
-    database = client.db("test");
+    database = client.db("production");
     expect(database).toBeTruthy();
-    foundles = database.collection("foundles");
+    charades = database.collection("charades");
     expect(database).toBeTruthy();
   });
 
@@ -46,26 +40,18 @@ describe("today's and next 6 foundles valid", () => {
     date.setUTCHours(date.getUTCHours() - 4);
     date.setUTCHours(date.getUTCHours() + (i * 24));
     const utcString = date.toUTCString();
-    const utcDateId = utcString.split(' ').slice(1, 4).join('-');
+    const utcDateId = utcString.split(" ").slice(1, 4).join("-");
     dateIdQueries.push({ utcDateId: utcDateId });
   }
   dateIdQueries.forEach(async (dateIdQuery) =>
-    test(`foundle ${dateIdQuery.utcDateId} valid`, async () => {
-      const foundle = await foundles.findOne(dateIdQuery);
-      expect(foundle).toBeTruthy();
-      expect(foundle.foundleId).toBeTruthy();
-      expect(foundle.foundleId.length).toBeGreaterThan(0);
-      expect(foundle.answerIndex).toBeDefined();
-      expect(foundle.answerIndex).not.toBeNull();
-      expect(foundle.answerIndex).toBeGreaterThanOrEqual(0);
-      expect(foundle.slideIndex).toBeDefined();
-      expect(foundle.slideIndex).not.toBeNull();
-      expect(foundle.slideIndex).toBeGreaterThanOrEqual(0);
-      expect(companies.length).toBeGreaterThan(foundle.answerIndex);
-      expect(companies[foundle.answerIndex].slideUrls.length).toBeGreaterThan(foundle.slideIndex);
-      expect(companies[foundle.answerIndex].slideUrls[foundle.slideIndex].length).toBeGreaterThan(0);
-      expect(companies[foundle.answerIndex].facts.length).toBeGreaterThan(0);
-      expect(companies[foundle.answerIndex].facts[0].length).toBeGreaterThan(0);
+    test(`charades ${dateIdQuery.utcDateId} valid`, async () => {
+      const charade = await charades.findOne(dateIdQuery);
+      expect(charade).toBeTruthy();
+      expect(charade.charadeIndex).toBeTruthy();
+      expect(charade.charadeIndex.length).toBeGreaterThan(0);
+      expect(charade.answer).toBeDefined();
+      expect(charade.answer).not.toBeNull();
+      expect(charade.answer).toHaveLength(5);
     }
     ));
 });

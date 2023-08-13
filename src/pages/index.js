@@ -637,44 +637,57 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <div className="divider my-0"></div>
             <p className="py-2">
               You have {numGuesses} chances to guess the prompt that ai used to generate this image. 
-
+              All prompts will be 5-letter words from the Wordle word list (at least according to 
+              this <a
+                href="https://gist.github.com/cfreshman/d97dbe7004522f7bc52ed2a6e22e2c04"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-500 hover:underline"
+              >source</a>).
             </p>
             <p className="py-2">
               After each guess, if your answer was incorrect, you will
-              be given a hint about whether the company which is the
-              correct answer was founded before, after, or in the same
-              year as the company you guessed.
+              be given hints about the letters in your guess.
             </p>
             <div className="divider my-0"></div>
             <h4 className="font-semibold">
               examples
             </h4>
-            <GuessResult
-              index={0}
-              guesses={["Apple"]}
-              processingGuess={false}
-            />
             <p className="py-2">
-              The company you chose, <span className="font-bold">Apple</span>,
-              is too old. The correct answer is a company founded later than Apple.
+              Let&apos;s say the answer is <b>prose</b>. Each letter of your guess will 
+              be assigned an emoji as a hint:
             </p>
             <GuessResult
               index={0}
-              guesses={["JD.com"]}
+              guesses={[{guessString: "mitch", guessEmojis: "🟥🟥🟥🟥🟥"}]}
               processingGuess={false}
             />
             <p className="py-2">
-              The company you chose, <span className="font-bold">JD.com</span>,
-              was founded in the same year as the company which is the correct answer.
+              Each letter has a red emoji, so none of the letters are present 
+              in the correct answer.
             </p>
             <GuessResult
               index={0}
-              guesses={["Google"]}
+              guesses={[{guessString: "fetch", guessEmojis: "🟥🟨🟥🟥🟥"}]}
               processingGuess={false}
             />
             <p className="py-2">
-              <span className="font-bold">Google</span> was
-              the correct answer!
+              The letter <b>e</b> has a yellow emoji, meaning that it is present (at least once) 
+              in the answer, but that the current position is not correct.
+            </p>
+            <GuessResult
+              index={0}
+              guesses={[{guessString: "crave", guessEmojis: "🟥🟩🟥🟥🟩"}]}
+              processingGuess={false}
+            />
+            <p className="py-2">
+              Both the letter <b>r</b> and the letter <b>e</b> have green emojis, meaning 
+              they are both in the correct position!
+            </p>
+            <p className="py-2">
+              When typing in a guess, the hints you&apos;ve received so far will show up 
+              as you type. If there is a ⬜️ emoji below a letter, that means you haven&apos;t 
+              guessed that letter yet, so you don&apos;t have any hints about it yet.
             </p>
             <div className="divider my-0"></div>
             <p className="py-2">
