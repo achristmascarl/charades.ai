@@ -81,12 +81,7 @@ const LetterStates = {
   CorrectSpot3: "CorrectSpot3",
   CorrectSpot4: "CorrectSpot4"
 };
-const GuessEmojis = {
-  Earlier: '⏪',
-  Later: '⏩',
-  SameYear: '🟨',
-  Correct: '✅',
-}
+
 const modalIDs = {
   GameFinished: 'GameFinished',
   Help: 'Help',
@@ -97,7 +92,35 @@ const referralParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=
 export default function Home({ charadeIndex, answerString, charadeId }) {
   const [guess, setGuess] = useState("");
   const [feedbackEmojis, setFeedbackEmojis] = useState("");
-  const [letterDict, setLetterDict] = useState({});
+  const [answerEmojis, setAnswerEmojis] = useState("");
+  const [letterDict, setLetterDict] = useState({
+    a: [],
+    b: [],
+    c: [],
+    d: [],
+    e: [],
+    f: [],
+    g: [],
+    h: [],
+    i: [],
+    j: [],
+    k: [],
+    l: [],
+    m: [],
+    n: [],
+    o: [],
+    p: [],
+    q: [],
+    r: [],
+    s: [],
+    t: [],
+    u: [],
+    v: [],
+    w: [],
+    x: [],
+    y: [],
+    z: [],
+  });
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
@@ -176,20 +199,31 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }))
   }
 
+  // set emojis for feedback and answer (what is stored in guesses)
   useEffect(() => {
     let feedbackEmojiString = "";
+    let answerEmojiString = "";
     for (let i = 0; i < guess.length; i++) {
-      if (letterDict[guess.charAt(i)] === LetterStates[`CorrectSpot${i}`]) {
+      if (letterDict[guess.charAt(i)].includes(LetterStates[`CorrectSpot${i}`])) {
         feedbackEmojiString += "🟩";
-      } else if (letterDict[guess.charAt(i)] === LetterStates[`WrongSpot${i}`]) {
+      } else if (letterDict[guess.charAt(i)].includes(LetterStates[`WrongSpot${i}`])) {
         feedbackEmojiString += "🟨";
-      } else if (letterDict[guess.charAt(i)] === LetterStates.NotPresent) {
-        feedbackEmojiString += "❌";
+      } else if (letterDict[guess.charAt(i)].includes(LetterStates.NotPresent)) {
+        feedbackEmojiString += "🟥";
       } else {
         feedbackEmojiString += "⬜"
       }
+
+      if (guess.charAt(i) === answerArray[i]) {
+        answerEmojiString += "🟩";
+      } else if (answerArray.includes(guess.charAt(i))) {
+        answerEmojiString += "🟨";
+      } else {
+        answerEmojiString += "🟥";
+      }
     }
     setFeedbackEmojis(feedbackEmojiString);
+    setAnswerEmojis(answerEmojiString);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guess]);
 
@@ -215,7 +249,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }
     addingNewGuess.push({
       guessString: guess.toString(),
-      guessEmojis: feedbackEmojis,
+      guessEmojis: answerEmojis,
     });
     if (addingNewGuess.length === numGuesses) {
       setGameFinished(true);
@@ -230,9 +264,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   }
 
   function generateLetterDict(guesses) {
-    const newLetterDict = {};
+    const newLetterDict = {...letterDict};
     for (let i = 0; i < guesses.length; i++) {
-      const guess = guesses[i];
+      const guess = guesses[i].guessString;
       for (let j = 0; j < guess.length; j++) {
         const letter = guess.charAt(j);
         let letterState = LetterStates.NotPresent;
@@ -242,7 +276,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         if (answerArray[j] === letter) {
           letterState = LetterStates[`CorrectSpot${j}`]
         }
-        newLetterDict[letter] = letterState;
+
+        if (!letterDict[letter].includes(letterState)) {
+          newLetterDict[letter].push(letterState);
+        }
       }
     }
     setLetterDict(newLetterDict);
@@ -324,7 +361,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           </div>
         </div>
         <div className="divider my-0"></div>
-        <div className="max-w-xl w-full mx-auto text-center">
+        <div className="max-w-md w-full mx-auto text-center">
           <h3 className="py-3 text-lg">
             {gameFinished ? (
               <>
@@ -371,7 +408,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             style={{ width: '100%', height: 'auto' }}
           />
         </div>
-        <div className="max-w-lg sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
+        <div className="max-w-md sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
           <div className="flex flex-row content-center justify-between">
             <input
               type="text"
@@ -380,9 +417,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               onChange={(e) => processInput(e)}
               value={guess}
               maxLength={5}
+              disabled={gameFinished || processingGuess}
             />
             <button
-              className="btn ml-3"
+              className="btn ml-3 sm:block hidden"
               disabled={guess.length < 1 || guess.length !== 5 || gameFinished || processingGuess}
               onClick={handleGuess}
             >👈 Guess</button>
@@ -400,6 +438,11 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               </span>)
             </p>
           }
+          <button
+              className="btn mx-auto mt-1 sm:hidden"
+              disabled={guess.length < 1 || guess.length !== 5 || gameFinished || processingGuess}
+              onClick={handleGuess}
+            >👆 Guess</button>
         </div>
         <div className="max-w-xl sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
@@ -409,13 +452,14 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         </div>
         <div className="divider"></div>
         <p className="p-0 text-center">
-          created by 🐦 at <a
+          built by 🐦s at <a
             href={`https://www.birbstreet.com/?${referralParams}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-500"
-          >birb street</a>.
+          >Birb Street</a>.
         </p>
+        <p className="p-0 text-center">Copyright © {new Date().getFullYear()}</p>
         <input
           type="checkbox"
           id="game-finished-modal"
