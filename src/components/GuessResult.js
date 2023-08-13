@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo } from "react";
 import { c } from "../utils";
 
 const GuessResult = memo(function GuessResult({ index, guesses, processingGuess }) {
@@ -17,7 +17,7 @@ const GuessResult = memo(function GuessResult({ index, guesses, processingGuess 
       {!(processingGuess && currentlyProcessing) && guess && (
         <div className="w-full h-full flex flex-col items-center justify-evenly sm:text-base text-sm">
           <div className="pl-1 font-mono tracking-[.45em]">
-           {guess.guessString}
+            {guess.guessString}
           </div>
           <div>
             {guess.guessEmojis}
