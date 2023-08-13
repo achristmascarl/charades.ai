@@ -327,7 +327,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         />
         <meta
           property="og:image"
-          content="/foundle-preview-image.jpg"
+          content="/charades-preview-image.jpg"
         />
       </Head>
       <div
