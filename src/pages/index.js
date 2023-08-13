@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Image from 'next/future/image';
-import dynamic from 'next/dynamic';
 
 import { MongoClient } from 'mongodb'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -84,6 +83,7 @@ const LetterStates = {
 
 const modalIDs = {
   GameFinished: 'GameFinished',
+  ComingSoon: 'ComingSoon',
   Help: 'Help',
   None: 'None',
 }
@@ -126,7 +126,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [guesses, setGuesses] = useState([]);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
-  const [shareString, setShareString] = useState(`charades.ai round ${charadeIndex} \n`);
+  const [shareString, setShareString] = useState(`🎭 r${charadeIndex}`);
   const [processingGuess, setProcessingGuess] = useState(false);
 
   const answerArray = answerString.split("");
@@ -175,18 +175,14 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   function updateShareString(gameWon) {
     let updatingShareString = `${shareString}`
     if (gameWon) {
-      updatingShareString += `${guesses.length}/${numGuesses} \n`;
+      updatingShareString += ` ${guesses.length}/${numGuesses} \n`;
     } else {
-      updatingShareString += `X/${numGuesses} \n`;
+      updatingShareString += ` X/${numGuesses} \n`;
     }
-    for (let i = 0; i < numGuesses; i++) {
-      if (i >= guesses.length) {
-        updatingShareString += `⬜️`;
-      } else {
-        updatingShareString += `${guesses[i].emoji}`;
-      }
+    for (let i = 0; i < guesses.length; i++) {
+      updatingShareString += `${guesses[i].guessEmojis} \n`;
     }
-    updatingShareString += ' \ncharades.ai';
+    updatingShareString += "\n\nhttps://charades.ai"
     setShareString(updatingShareString);
   }
 
@@ -370,11 +366,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 ) : (
                   `maybe next time 😢 the answer was `
                 )}
-                <p
-                  className="text-blue-500"
-                >
-                  {answerString}
-                </p>
+                <b>{answerString}</b>.
               </>
             ) : (
               "guess the prompt that ai used to generate this image!"
@@ -395,6 +387,18 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                   Share Results
                 </button>
               </CopyToClipboard>
+              <button
+                className="btn mx-auto my-3"
+                onClick={() => {
+                  setModalOpenId(modalIDs.ComingSoon);
+                  track("click_play_again", "button_click", "coming_soon");
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                  <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
+                </svg>
+                Play Again ($1)
+              </button>
             </>
           )}
           <Image
@@ -444,7 +448,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               onClick={handleGuess}
             >👆 Guess</button>
         </div>
-        <div className="max-w-xl sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
+        <div className="max-w-md sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
           {[...Array(numGuesses)].map((x, i) =>
             <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} />
@@ -475,9 +479,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         />
         <label
           htmlFor="game-finished-modal"
-          className="modal cursor-pointer z-40"
+          className="modal items-baseline cursor-pointer z-40"
         >
-          <label className="modal-box relative" htmlFor="">
+          <label className="modal-box relative mt-24" htmlFor="">
             <label htmlFor="game-finished-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 className="text-lg font-bold">
               {gameWon ? (
@@ -486,10 +490,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 'maybe next time 😢'
               )}
             </h3>
-            <p className="py-4">
+            <p className="py-2">
               the answer was <b>{answerString}</b>.
             </p>
-            <p className="py-4">time until next round of charades: <CharadeCountdown /></p>
+            <p className="py-2">time until next round of charades: <CharadeCountdown /></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
                 text={shareString}
@@ -504,20 +508,70 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                   Share Results
                 </button>
               </CopyToClipboard>
-              <a
+              <button
                 className="btn mx-auto my-3"
-                href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
-                target="_blank"
-                rel="noreferrer"
+                onClick={() => {
+                  setModalOpenId(modalIDs.ComingSoon);
+                  track("click_play_again", "button_click", "coming_soon");
+                }}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
-                  <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                  <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
                 </svg>
-                Send Feedback
-              </a>
+                Play Again ($1)
+              </button>
             </div>
           </label>
         </label>
+
+        <input
+          type="checkbox"
+          id="coming-soon-modal"
+          className="modal-toggle"
+          checked={modalOpenId && modalOpenId === modalIDs.ComingSoon}
+          onChange={() =>
+            setModalOpenId(
+              (modalOpenId === modalIDs.ComingSoon)
+                ? modalIDs.None
+                : modalIDs.ComingSoon
+            )
+          }
+        />
+        <label
+          htmlFor="coming-soon-modal"
+          className="modal cursor-pointer z-40"
+        >
+          <label className="modal-box relative" htmlFor="">
+            <label htmlFor="coming-soon-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 className="text-lg font-bold">
+              coming soon 👀
+            </h3>
+            <p className="py-2">
+              we&apos;re working on the following features for premium users:
+            </p>
+            <p className="ml-2 py-2">
+              ✨ play as many rounds as you want per day
+            </p>
+            <p className="ml-2 py-2">
+              🎯 longer prompts for more difficulty
+            </p>
+            <p className="py-2">
+              let us know if there&apos;s anything else you&apos;d like to see!
+            </p>
+            <a
+              className="btn mx-auto my-3"
+              href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
+                <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
+              </svg>
+              Send Feedback
+            </a>
+          </label>
+        </label>
+
         <input
           type="checkbox"
           id="help-modal"
