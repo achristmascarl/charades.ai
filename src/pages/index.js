@@ -5,13 +5,13 @@ import Image from 'next/future/image';
 import { MongoClient } from 'mongodb'
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
-import { c, track } from '../utils';
+import { track, wordList } from '../utils';
 import GuessResult from '../components/GuessResult';
 import CharadeCountdown from '../components/CharadeCountdown';
 import { placeholderSquareTinyBase64 } from '../../public/blurImages';
 // import styles from '../styles/Home.module.css';
 
-export async function getStaticProps(context) {
+export async function getStaticProps() {
   let charadeIndex = "0";
   let answerString = "";
   let charadeId = "";
@@ -126,6 +126,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [guesses, setGuesses] = useState([]);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
+  const [showWordListError, setShowWordListError] = useState(false);
+  const [showRepeatError, setShowRepeatError] = useState(false);
   const [shareString, setShareString] = useState(`🎭 r${charadeIndex}`);
   const [processingGuess, setProcessingGuess] = useState(false);
 
@@ -234,28 +236,40 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
 
   function handleGuess() {
     setProcessingGuess(true);
-    const addingNewGuess = Array.from(guesses);
-    track(`guessed_${guess}`, "game_state", `guess_${addingNewGuess.length + 1}_${guess}`);
-    if (guess.toString() === answerString) {
-      setGameWon(true);
-      setGameFinished(true);
-      track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
+    if (!wordList.includes(guess)) {
+      setShowWordListError(true);
+      setTimeout(() => {
+        setShowWordListError(false);
+      }, 3000);
+    } else if (guesses.map((guess) => guess.guessString).includes(guess)) {
+      setShowRepeatError(true);
+      setTimeout(() => {
+        setShowRepeatError(false);
+      }, 3000);
     } else {
-      track("guessed_wrong", "game_state", `guess_${addingNewGuess.length + 1}`);
-    }
-    addingNewGuess.push({
-      guessString: guess.toString(),
-      guessEmojis: answerEmojis,
-    });
-    if (addingNewGuess.length === numGuesses) {
-      setGameFinished(true);
-      if (!(guess.toString() === answerString)){
-        track("game_lost", "game_state", "game_lost");
+      const addingNewGuess = Array.from(guesses);
+      track(`guessed_${guess}`, "game_state", `guess_${addingNewGuess.length + 1}_${guess}`);
+      if (guess.toString() === answerString) {
+        setGameWon(true);
+        setGameFinished(true);
+        track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
+      } else {
+        track("guessed_wrong", "game_state", `guess_${addingNewGuess.length + 1}`);
       }
+      addingNewGuess.push({
+        guessString: guess.toString(),
+        guessEmojis: answerEmojis,
+      });
+      if (addingNewGuess.length === numGuesses) {
+        setGameFinished(true);
+        if (!(guess.toString() === answerString)){
+          track("game_lost", "game_state", "game_lost");
+        }
+      }
+      setGuesses(addingNewGuess);
+      setGuess("");
+      saveGame();
     }
-    setGuesses(addingNewGuess);
-    setGuess("");
-    saveGame();
     setTimeout(() => setProcessingGuess(false), 750);
   }
 
@@ -286,7 +300,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     setShowCopiedAlert(true);
     setTimeout(() => {
       setShowCopiedAlert(false);
-    }, 2500)
+    }, 2500);
     track("click_share_results", "button_click", "share_results");
   }
 
@@ -324,8 +338,21 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           {showCopiedAlert && (
             <div className="alert">
               <div>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>Copied results to clipboard.</span>
               </div>
+            </div>
+          )}
+          {showWordListError && (
+            <div className="alert alert-error">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>Guess not in word list, please try again.</span>
+            </div>
+          )}
+          {showRepeatError && (
+            <div className="alert alert-error">
+              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>You&apos;ve already guessed this word, please try again.</span>
             </div>
           )}
         </div>
@@ -397,7 +424,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
                 </svg>
-                Play Again ($1)
+                Play Again <div className="badge text-blue-500">$0.50</div>
               </button>
             </>
           )}
@@ -518,7 +545,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
                 </svg>
-                Play Again ($1)
+                Play Again
+                <div className="badge text-blue-500">$0.50</div>
               </button>
             </div>
           </label>
@@ -547,7 +575,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               coming soon 👀
             </h3>
             <p className="py-2">
-              we&apos;re working on the following features for premium users:
+              thanks for enjoying the game! we haven&apos;t finished building the 
+              ability to play again, but it&apos;s coming soon along with some other features:
             </p>
             <p className="ml-2 py-2">
               ✨ play as many rounds as you want per day
@@ -555,20 +584,25 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <p className="ml-2 py-2">
               🎯 longer prompts for more difficulty
             </p>
-            <p className="py-2">
-              let us know if there&apos;s anything else you&apos;d like to see!
+            <p className="ml-2 py-2">
+              💲 buy packs of rounds and save money
             </p>
-            <a
-              className="btn mx-auto my-3"
-              href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
-                <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
-              </svg>
-              Send Feedback
-            </a>
+            <p className="py-2">
+              let us know if there&apos;s anything else you&apos;d like to see 👇
+            </p>
+            <div className="w-full text-right">
+              <a
+                className="btn my-3"
+                href="mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 mr-2">
+                  <path fillRule="evenodd" d="M4.848 2.771A49.144 49.144 0 0112 2.25c2.43 0 4.817.178 7.152.52 1.978.292 3.348 2.024 3.348 3.97v6.02c0 1.946-1.37 3.678-3.348 3.97a48.901 48.901 0 01-3.476.383.39.39 0 00-.297.17l-2.755 4.133a.75.75 0 01-1.248 0l-2.755-4.133a.39.39 0 00-.297-.17 48.9 48.9 0 01-3.476-.384c-1.978-.29-3.348-2.024-3.348-3.97V6.741c0-1.946 1.37-3.68 3.348-3.97zM6.75 8.25a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 2.25a.75.75 0 000 1.5H12a.75.75 0 000-1.5H7.5z" clipRule="evenodd" />
+                </svg>
+                Send Feedback
+              </a>
+            </div>
           </label>
         </label>
 
@@ -596,8 +630,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </h3>
             <div className="divider my-0"></div>
             <p className="py-2">
-              You have {numGuesses} chances to guess the company whose slide deck
-              is displayed.
+              You have {numGuesses} chances to guess the prompt that ai used to generate this image. 
+
             </p>
             <p className="py-2">
               After each guess, if your answer was incorrect, you will
