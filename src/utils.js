@@ -5235,6 +5235,7 @@ export const wordList = [
   "lives",
   "livor",
   "livre",
+  "llama",
   "llano",
   "loach",
   "loads",

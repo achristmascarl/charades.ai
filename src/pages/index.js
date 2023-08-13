@@ -13,8 +13,8 @@ import { placeholderSquareTinyBase64 } from '../../public/blurImages';
 
 export async function getStaticProps() {
   let charadeIndex = "0";
-  let answerString = "";
-  let charadeId = "";
+  let answerString = "prose";
+  let charadeId = "64d867ff4f182b001c69ba6d";
   let client;
 
   let url = process.env.MONGO_URL;
@@ -332,13 +332,13 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       </Head>
       <div
         id="main"
-        className="flex flex-col max-w-7xl mx-auto min-h-screen overflow-x-hidden content-center sm:p-10 p-3 pt-3"
+        className="flex flex-col max-w-xl mx-auto min-h-screen overflow-x-hidden content-center sm:p-10 p-3 pt-3"
       >
-        <div className="toast toast-top toast-center w-full z-50">
+        <div className="toast toast-top toast-center z-50">
           {showCopiedAlert && (
             <div className="alert">
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>Copied results to clipboard.</span>
               </div>
             </div>
@@ -439,7 +439,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             style={{ width: '100%', height: 'auto' }}
           />
         </div>
-        <div className="max-w-md sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
+        <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <div className="flex flex-row content-center justify-between">
             <input
               type="text"
@@ -475,7 +475,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               onClick={handleGuess}
             >👆 Guess</button>
         </div>
-        <div className="max-w-md sm:w-3/4 w-full mx-auto text-center flex flex-col mt-3">
+        <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
           {[...Array(numGuesses)].map((x, i) =>
             <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} />
