@@ -1,6 +1,6 @@
-# 🧐 foundle
+# 🎭 charades.ai
 
-wordle for founders: guess the startup whose pitch deck the slide is from
+charades with ai: guess the prompt for the ai-generated image
 
 ## getting start with railway cli
 
