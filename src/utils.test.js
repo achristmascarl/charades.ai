@@ -40,12 +40,12 @@ describe("today's and next 6 rounds of charades valid", () => {
     const date = new Date(Date.now());
     date.setUTCHours(date.getUTCHours() - 4);
     date.setUTCHours(date.getUTCHours() + (i * 24));
-    const utcString = date.toUTCString();
-    const utcDateId = utcString.split(" ").slice(1, 4).join("-");
-    dateIdQueries.push({ utcDateId: utcDateId });
+    const isoString = date.toISOString();
+    const isoDateId = isoString.split("T")[0];
+    dateIdQueries.push({ isoDateId: isoDateId });
   }
   dateIdQueries.forEach(async (dateIdQuery) =>
-    test(`charades ${dateIdQuery.utcDateId} valid`, async () => {
+    test(`charades ${dateIdQuery.isoDateId} valid`, async () => {
       const charade = await charades.findOne(dateIdQuery);
       const charadeId = charade._id.toString();
       expect(charade).toBeTruthy();

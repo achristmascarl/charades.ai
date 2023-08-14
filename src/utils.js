@@ -1,4 +1,4 @@
-export function c(...classNames) {
+function c(...classNames) {
   return classNames
     .filter(v => v)
     .join(" ")
@@ -6,19 +6,16 @@ export function c(...classNames) {
     .replace(/\s{2,}/g, " ");
 }
 
-export function track(action, category, label, value = 0, non_interaction = false) {
+function track(action, category, label, value = 0, non_interaction = false) {
   window.gtag("event", action, {
     event_category: category,
     event_label: label,
     value,
     non_interaction,
-    // 'event_callback': function () {
-    //   () => {}
-    // }
   });
 }
 
-export const wordList = [
+const wordList = [
   "aahed",
   "aalii",
   "aapas",
@@ -14875,3 +14872,5 @@ export const wordList = [
   "zymes",
   "zymic",
 ]
+
+module.exports = { c, track, wordList };

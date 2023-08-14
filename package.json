@@ -10,18 +10,23 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "analyze": "cross-env ANALYZE=true next build"
+    "analyze": "cross-env ANALYZE=true next build",
+    "generate": "node scripts/generateCharades.mjs"
   },
   "dependencies": {
     "daisyui": "^3.5.1",
+    "dotenv": "^16.3.1",
     "mongodb": "^4.11.0",
     "next": "12.3.0",
+    "openai": "^3.3.0",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "18.2.0",
-    "sharp": "^0.31.1"
+    "sharp": "^0.31.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.388.0",
     "@next/bundle-analyzer": "^13.0.0",
     "@swc/core": "^1.3.11",
     "@swc/jest": "^0.2.23",

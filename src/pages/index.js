@@ -32,9 +32,10 @@ export async function getStaticProps() {
     // get charade for today
     const date = new Date(Date.now());
     date.setUTCHours(date.getUTCHours() - 4);
-    const utcString = date.toUTCString();
-    const utcDateId = utcString.split(" ").slice(1, 4).join("-");
-    const query = { utcDateId: utcDateId };
+    const isoString = date.toISOString();
+    const isoDateId = isoString.split("T")[0];
+    console.log(isoDateId);
+    const query = { isoDateId: isoDateId };
     console.log(query);
     const charade = await charades.findOne(query);
     console.log(charade);

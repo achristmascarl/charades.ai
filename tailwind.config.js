@@ -19,38 +19,38 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'teal': {
-          DEFAULT: '#2A7B88',
+        "teal": {
+          DEFAULT: "#2A7B88",
         },
-        'koamaru': {
-          DEFAULT: '#3D315B',
+        "koamaru": {
+          DEFAULT: "#3D315B",
         },
-        'jazzberry': {
-          DEFAULT: '#991862',
+        "jazzberry": {
+          DEFAULT: "#991862",
         },
-        'independence': {
-          DEFAULT: '#425569',
+        "independence": {
+          DEFAULT: "#425569",
         },
-        'asparagus': {
-          DEFAULT: '#7EA16B',
+        "asparagus": {
+          DEFAULT: "#7EA16B",
         },
-        'spanish': {
-          DEFAULT: '#EBBAB9',
+        "spanish": {
+          DEFAULT: "#EBBAB9",
         },
-        'vermillion': {
-          DEFAULT: '#CC444B',
+        "vermillion": {
+          DEFAULT: "#CC444B",
         },
-        'pastel': {
-          DEFAULT: '#B0D0D3',
+        "pastel": {
+          DEFAULT: "#B0D0D3",
         },
-        'apricot': {
-          DEFAULT: '#FCD7AD',
+        "apricot": {
+          DEFAULT: "#FCD7AD",
         },
-        'saffron': {
-          DEFAULT: '#FFA630',
+        "saffron": {
+          DEFAULT: "#FFA630",
         },
-        'birb': {
-          DEFAULT: '#1566B0',
+        "birb": {
+          DEFAULT: "#1566B0",
         },
       },
     },
