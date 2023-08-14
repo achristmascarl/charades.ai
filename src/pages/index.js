@@ -236,7 +236,6 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   }
 
   function handleGuess() {
-    setProcessingGuess(true);
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
       setTimeout(() => {
@@ -248,6 +247,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         setShowRepeatError(false);
       }, 3000);
     } else {
+      setProcessingGuess(true);
       const addingNewGuess = Array.from(guesses);
       track(`guessed_${guess}`, "game_state", `guess_${addingNewGuess.length + 1}_${guess}`);
       if (guess.toString() === answerString) {
@@ -270,8 +270,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       setGuesses(addingNewGuess);
       setGuess("");
       saveGame();
+      setTimeout(() => setProcessingGuess(false), 750);
     }
-    setTimeout(() => setProcessingGuess(false), 750);
   }
 
   function generateLetterDict(guesses) {
