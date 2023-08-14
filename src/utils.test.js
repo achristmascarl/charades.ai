@@ -1,14 +1,19 @@
-import { wordList } from "./utils";
+import { answerList, wordList } from "./utils";
 import { MongoClient } from "mongodb";
 import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
 import { render, screen } from "@testing-library/react";
 
-test("word list exists", () => {
+test("answer and word lists exists", () => {
+  expect(answerList).toBeTruthy();
+  expect(answerList.length).toBeGreaterThan(0);
   expect(wordList).toBeTruthy();
   expect(wordList.length).toBeGreaterThan(0);
 });
 
 test("word list is all 5-letter words", () => {
+  answerList.forEach(answer => {
+    expect(answer.length).toBe(5);
+  });
   wordList.forEach(word => {
     expect(word.length).toBe(5);
   });

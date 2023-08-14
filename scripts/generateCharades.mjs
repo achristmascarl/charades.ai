@@ -6,7 +6,7 @@ dotenv.config();
 import https from "https";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
-import { wordList } from "../src/utils.js";
+import { answerList } from "../src/utils.js";
 import { MongoClient } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
 const s3 = new S3({region: "us-east-2"});
@@ -51,8 +51,8 @@ console.log(process.cwd());
 for (let i = 0; i < generationInfo.length; i++) {
   const id = uuidv4();
   console.log(id);
-  const promptIndex = Math.floor(Math.random() * wordList.length);
-  const prompt = wordList[promptIndex];
+  const promptIndex = Math.floor(Math.random() * answerList.length);
+  const prompt = answerList[promptIndex];
   console.log(prompt);
   let response;
   try {
