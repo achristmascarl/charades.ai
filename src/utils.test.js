@@ -25,10 +25,16 @@ describe("today's and next 6 rounds of charades valid", () => {
     expect(url).toBeTruthy();
     client = await MongoClient.connect(url);
     expect(client).toBeTruthy();
+    expect(client).not.toBeNull();
+    expect(client).not.toBeUndefined();
     database = client.db("production");
     expect(database).toBeTruthy();
+    expect(database).not.toBeNull();
+    expect(database).not.toBeUndefined();
     charades = database.collection("charades");
-    expect(database).toBeTruthy();
+    expect(charades).toBeTruthy();
+    expect(charades).not.toBeNull();
+    expect(charades).not.toBeUndefined();
   });
 
   afterAll(async () => {
@@ -51,6 +57,7 @@ describe("today's and next 6 rounds of charades valid", () => {
       expect(charade).toBeTruthy();
       expect(charade.charadeIndex).toBeTruthy();
       expect(charade.charadeIndex.length).toBeGreaterThan(0);
+      expect(parseInt(charade.charadeIndex)).toBeGreaterThan(0);
       expect(charade.answer).toBeDefined();
       expect(charade.answer).not.toBeNull();
       expect(charade.answer).toHaveLength(5);

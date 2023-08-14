@@ -185,7 +185,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     for (let i = 0; i < guesses.length; i++) {
       updatingShareString += `${guesses[i].guessEmojis} \n`;
     }
-    updatingShareString += "\n\nhttps://charades.ai"
+    updatingShareString += "\nhttps://charades.ai"
     setShareString(updatingShareString);
   }
 
