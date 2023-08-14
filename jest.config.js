@@ -4,5 +4,7 @@ const createJestConfig = nextJest({
 });
 const customJestConfig = {
   moduleDirectories: ["node_modules", "<rootDir>/"],
+  testEnvironment: "jsdom",
+  setupFiles: ["<rootDir>/jest-shim.js"],
 };
 module.exports = createJestConfig(customJestConfig);

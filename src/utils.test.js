@@ -1,6 +1,7 @@
 import { wordList } from "./utils";
 import { MongoClient } from "mongodb";
 import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
+import { render, screen } from "@testing-library/react";
 
 test("word list exists", () => {
   expect(wordList).toBeTruthy();
@@ -46,12 +47,18 @@ describe("today's and next 6 rounds of charades valid", () => {
   dateIdQueries.forEach(async (dateIdQuery) =>
     test(`charades ${dateIdQuery.utcDateId} valid`, async () => {
       const charade = await charades.findOne(dateIdQuery);
+      const charadeId = charade._id.toString();
       expect(charade).toBeTruthy();
       expect(charade.charadeIndex).toBeTruthy();
       expect(charade.charadeIndex.length).toBeGreaterThan(0);
       expect(charade.answer).toBeDefined();
       expect(charade.answer).not.toBeNull();
       expect(charade.answer).toHaveLength(5);
-    }
-    ));
+      // eslint-disable-next-line @next/next/no-img-element
+      render(<img src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`} alt="ai-generated image"/>)
+      const displayedImage = screen.getByAltText("ai-generated image");
+      expect(displayedImage).toBeTruthy();
+      expect(displayedImage.src).toContain(`${charadeId}.jpg`);
+    })
+  );
 });
