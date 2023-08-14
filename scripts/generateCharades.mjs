@@ -48,9 +48,10 @@ for (let i = 1; i < 8; i++) {
 }
 console.log(generationInfo);
 
-process.chdir("/tmp");
+console.log(process.cwd());
 // for (let generation in generationInfo) {
 const id = uuidv4();
+console.log(id);
 const promptIndex = Math.floor(Math.random() * wordList.length);
 const prompt = wordList[promptIndex];
 console.log(prompt);
@@ -61,14 +62,9 @@ const response = await openai.createImage({
 });
 const imageUrl = response.data.data[0].url;
 console.log(imageUrl);
-const file = fs.createWriteStream(`${id}.jpg`);
+const file = fs.createWriteStream(`tmp/${id}.jpg`);
 https.get(imageUrl, function(response) {
   response.pipe(file);
-
-  file.on("finish", () => {
-    file.close();
-    console.log("file closed");
-  });
 });
 
 // }
