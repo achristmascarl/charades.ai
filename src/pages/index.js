@@ -343,13 +343,13 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </div>
           )}
           {showWordListError && (
-            <div className="alert alert-error">
+            <div className="alert alert-error flex flex-row">
               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <span>Guess not in word list, please try again.</span>
             </div>
           )}
           {showRepeatError && (
-            <div className="alert alert-error">
+            <div className="alert alert-error flex flex-row">
               <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <span>You&apos;ve already guessed this word, please try again.</span>
             </div>
@@ -428,7 +428,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </>
           )}
           <div
-            className={`transition-all duration-700 carousel carousel-center shadow-inner w-full space-x-4 bg-gray-100 touch-pan-x ${
+            className={`transition-all duration-700 carousel carousel-center shadow-inner w-full space-x-4 bg-gray-100 ${
               (guesses.length < 1) ? "p-0" : "p-3 rounded-box"
             }`}
           >
@@ -540,7 +540,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <input
               type="text"
               placeholder="Type guess here"
-              className="input input-bordered w-full font-mono tracking-[.45em]"
+              className="input input-bordered w-full font-mono tracking-[.45rem]"
               onChange={(e) => processInput(e)}
               value={guess}
               maxLength={5}
