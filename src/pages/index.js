@@ -9,7 +9,7 @@ import { track, wordList } from "../utils";
 import GuessResult from "../components/GuessResult";
 import CharadeCountdown from "../components/CharadeCountdown";
 import { placeholderSquareTinyBase64 } from "../../public/blurImages";
-// import styles from '../styles/Home.module.css';
+import styles from "../styles/Home.module.css";
 
 export async function getStaticProps() {
   let charadeIndex = "0";
@@ -433,16 +433,16 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </>
           )}
           <div
-            className={`transition-all duration-700 carousel carousel-center w-full space-x-4 bg-neutral touch-pan-x ${
+            className={`transition-all duration-700 carousel carousel-center shadow-inner w-full space-x-4 bg-gray-100 touch-pan-x ${
               (guesses.length < 1) ? "p-0" : "p-3 rounded-box"
             }`}
           >
             <div
               id="pic1"
               className={
-                `transition-all duration-700 carousel-item overflow-hidden ${
+                `transition-all duration-700 carousel-item scroll-mt-2 ${
                   (guesses.length > 0 || gameWon) ? "w-4/5 rounded-box" : "w-full"
-                }`
+                } ${styles.carouselItem}`
               }>
               <Image
                 src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`}
@@ -452,12 +452,12 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto", borderRadius: "1rem"}}
               />
             </div> 
             <div
               id="pic2"
-              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+              className={`transition-all duration-700 carousel-item scroll-mt-2 w-4/5 rounded-box ${
                 (guesses.length > 0 || gameWon) ? "block opacity-100" : "hidden opacity-0"
               }`}
             >
@@ -469,12 +469,12 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
               />
             </div> 
             <div
               id="pic3"
-              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+              className={`transition-all duration-700 carousel-item scroll-mt-2 w-4/5 rounded-box ${
                 (guesses.length > 1 || gameWon) ? "block opacity-100" : "hidden opacity-0"
               }`}
             >
@@ -486,12 +486,12 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
               />
             </div> 
             <div
               id="pic4"
-              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+              className={`transition-all duration-700 carousel-item scroll-mt-2 w-4/5 rounded-box ${
                 (guesses.length > 2 || gameWon) ? "block opacity-100" : "hidden opacity-0"
               }`}
             >
@@ -503,12 +503,12 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
               />
             </div> 
             <div
               id="pic5"
-              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+              className={`transition-all duration-700 carousel-item scroll-mt-2 w-4/5 rounded-box ${
                 (guesses.length > 3 || gameWon) ? "block opacity-100" : "hidden opacity-0"
               }`}
             >
@@ -520,7 +520,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
               />
             </div> 
           </div>
