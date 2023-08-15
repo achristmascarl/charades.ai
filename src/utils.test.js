@@ -71,6 +71,13 @@ describe("today's and next 6 rounds of charades valid", () => {
       const displayedImage = screen.getByAltText("ai-generated image");
       expect(displayedImage).toBeTruthy();
       expect(displayedImage.src).toContain(`${charadeId}.jpg`);
+      for (let i = 1; i < 5; i++) {
+        // eslint-disable-next-line @next/next/no-img-element
+        render(<img src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}-${i}.jpg`} alt={`ai-generated image ${i}`}/>)
+        const displayedImage = screen.getByAltText(`ai-generated image ${i}`);
+        expect(displayedImage).toBeTruthy();
+        expect(displayedImage.src).toContain(`${charadeId}-${i}.jpg`);
+      }
     })
   );
 });

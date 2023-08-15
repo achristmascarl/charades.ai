@@ -35,7 +35,8 @@ export async function getStaticProps() {
     const isoString = date.toISOString();
     const isoDateId = isoString.split("T")[0];
     console.log(isoDateId);
-    const query = { isoDateId: isoDateId };
+    // const query = { isoDateId: isoDateId };
+    const query = { isoDateId: "2023-08-13" };
     console.log(query);
     const charade = await charades.findOne(query);
     console.log(charade);
@@ -150,11 +151,14 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charadeIndex]);
 
-  // save game when guesses change
+  // save game, generate hints, and navigate to new picture
+  // when guesses change
   useEffect(() => {
     if (guesses.length > 0) {
       saveGame();
       generateLetterDict(guesses);
+      const cleanUrl = window.location.href.split("#")[0];
+      window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [guesses]);
@@ -429,16 +433,107 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               </button>
             </>
           )}
-          <Image
-            src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`}
-            placeholder="blur"
-            blurDataURL={placeholderSquareTinyBase64}
-            alt="ai-generated image"
-            width="200"
-            height="200"
-            sizes="100vw"
-            style={{ width: "100%", height: "auto" }}
-          />
+          <div
+            className={`transition-all duration-700 carousel carousel-center w-full space-x-4 bg-neutral touch-pan-x ${
+              (guesses.length < 1) ? "p-0" : "p-3 rounded-box"
+            }`}
+          >
+            <div
+              id="pic1"
+              className={
+                `transition-all duration-700 carousel-item overflow-hidden ${
+                  (guesses.length > 0 || gameWon) ? "w-4/5 rounded-box" : "w-full"
+                }`
+              }>
+              <Image
+                src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`}
+                placeholder="blur"
+                blurDataURL={placeholderSquareTinyBase64}
+                alt="ai-generated image 1"
+                width="200"
+                height="200"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div> 
+            <div
+              id="pic2"
+              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+                (guesses.length > 0 || gameWon) ? "block opacity-100" : "hidden opacity-0"
+              }`}
+            >
+              <Image
+                src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}-1.jpg`}
+                placeholder="blur"
+                blurDataURL={placeholderSquareTinyBase64}
+                alt="ai-generated image 2"
+                width="200"
+                height="200"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div> 
+            <div
+              id="pic3"
+              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+                (guesses.length > 1 || gameWon) ? "block opacity-100" : "hidden opacity-0"
+              }`}
+            >
+              <Image
+                src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}-2.jpg`}
+                placeholder="blur"
+                blurDataURL={placeholderSquareTinyBase64}
+                alt="ai-generated image 3"
+                width="200"
+                height="200"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div> 
+            <div
+              id="pic4"
+              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+                (guesses.length > 2 || gameWon) ? "block opacity-100" : "hidden opacity-0"
+              }`}
+            >
+              <Image
+                src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}-3.jpg`}
+                placeholder="blur"
+                blurDataURL={placeholderSquareTinyBase64}
+                alt="ai-generated image 4"
+                width="200"
+                height="200"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div> 
+            <div
+              id="pic5"
+              className={`transition-all duration-700 carousel-item w-4/5 rounded-box overflow-hidden ${
+                (guesses.length > 3 || gameWon) ? "block opacity-100" : "hidden opacity-0"
+              }`}
+            >
+              <Image
+                src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}-4.jpg`}
+                placeholder="blur"
+                blurDataURL={placeholderSquareTinyBase64}
+                alt="ai-generated image 5"
+                width="200"
+                height="200"
+                sizes="100vw"
+                style={{ width: "100%", height: "auto" }}
+              />
+            </div> 
+          </div>
+          <div className="flex justify-center w-full py-2 gap-2">
+            {(guesses.length > 0 || gameFinished) && (<>
+              <a href="#pic1" className="btn btn-xs">1</a> 
+              <a href="#pic2" className="btn btn-xs">2</a> 
+            </>)}
+            {(guesses.length > 1 || gameFinished) && (<a href="#pic3" className="btn btn-xs">3</a>)}
+            {(guesses.length > 2 || gameFinished) && (<a href="#pic4" className="btn btn-xs">4</a>)}
+            {(guesses.length > 3 || gameFinished) && (<a href="#pic5" className="btn btn-xs">5</a>)}
+          </div>
           <p className="text-xs italic">generated by <a
             href={"https://openai.com/blog/dall-e/"}
             target="_blank"

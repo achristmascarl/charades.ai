@@ -11,8 +11,8 @@ const configuration = new Configuration({
 const openai = new OpenAIApi(configuration);
 
 const response = await openai.createImage({
-  prompt: "prose",
-  n: 3,
+  prompt: "llama",
+  n: 1,
   size: "256x256",
 });
 
