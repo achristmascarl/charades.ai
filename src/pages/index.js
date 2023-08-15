@@ -737,7 +737,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             </p>
             <p className="py-2">
               After each guess, if your answer was incorrect, you will
-              be given hints about the letters in your guess.
+              be given hints about the letters in your guess as well as 
+              a new picture generated from the same prompt.
             </p>
             <div className="divider my-0"></div>
             <h4 className="font-semibold">
