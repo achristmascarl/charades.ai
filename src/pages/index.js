@@ -165,12 +165,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   // check to see if the game is finished
   useEffect(() => {
     if (gameWon && gameFinished) {
-      // console.log('game finished, won');
       updateShareString(gameWon);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     } else if (gameFinished) {
-      // console.log('game finished, lost');
       updateShareString(gameWon);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
@@ -297,7 +295,6 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       }
     }
     setLetterDict(newLetterDict);
-    console.log(newLetterDict);
   }
 
   function handleShareResults() {
@@ -452,7 +449,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 width="200"
                 height="200"
                 sizes="100vw"
-                style={{ width: "100%", height: "auto", borderRadius: "1rem"}}
+                style={{ width: "100%", height: "auto", borderRadius: (guesses.length < 1) ?  "0" : "1rem"}}
               />
             </div> 
             <div
