@@ -65,7 +65,6 @@ describe("today's and next 6 rounds of charades valid", () => {
     }
     expect(s3objects).toBeTruthy();
     expect(s3objects.length).toBeGreaterThan(0);
-    console.log(s3objects);
   });
 
   afterAll(async () => {

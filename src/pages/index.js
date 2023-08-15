@@ -35,8 +35,7 @@ export async function getStaticProps() {
     const isoString = date.toISOString();
     const isoDateId = isoString.split("T")[0];
     console.log(isoDateId);
-    // const query = { isoDateId: isoDateId };
-    const query = { isoDateId: "2023-08-13" };
+    const query = { isoDateId: isoDateId };
     console.log(query);
     const charade = await charades.findOne(query);
     console.log(charade);
