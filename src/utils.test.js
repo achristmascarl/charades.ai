@@ -1,14 +1,21 @@
-import { wordList } from "./utils";
+import { answerList, wordList } from "./utils";
 import { MongoClient } from "mongodb";
+import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
 import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
-import { render, screen } from "@testing-library/react";
+import dotenv from "dotenv";
+dotenv.config();
 
-test("word list exists", () => {
+test("answer and word lists exists", () => {
+  expect(answerList).toBeTruthy();
+  expect(answerList.length).toBeGreaterThan(0);
   expect(wordList).toBeTruthy();
   expect(wordList.length).toBeGreaterThan(0);
 });
 
 test("word list is all 5-letter words", () => {
+  answerList.forEach(answer => {
+    expect(answer.length).toBe(5);
+  });
   wordList.forEach(word => {
     expect(word.length).toBe(5);
   });
@@ -19,6 +26,8 @@ describe("today's and next 6 rounds of charades valid", () => {
   let client;
   let database;
   let charades;
+  let s3client;
+  let s3objects = [];
 
   beforeAll(async () => {
     url = process.env.MONGO_URL;
@@ -35,6 +44,27 @@ describe("today's and next 6 rounds of charades valid", () => {
     expect(charades).toBeTruthy();
     expect(charades).not.toBeNull();
     expect(charades).not.toBeUndefined();
+    s3client = new S3Client({ region: "us-east-2" });
+    expect(s3client).toBeTruthy();
+    expect(s3client).not.toBeNull();
+    expect(s3client).not.toBeUndefined();
+    const command = new ListObjectsV2Command({
+      Bucket: "charades.ai",
+    });
+    try {
+      let isTruncated = true;
+      while (isTruncated) {
+        const { Contents, IsTruncated, NextContinuationToken } = await s3client.send(command);
+        Contents.forEach((c) => s3objects.push(c.Key));
+        isTruncated = IsTruncated;
+        command.input.ContinuationToken = NextContinuationToken;
+      }
+    } catch (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+    expect(s3objects).toBeTruthy();
+    expect(s3objects.length).toBeGreaterThan(0);
   });
 
   afterAll(async () => {
@@ -61,11 +91,10 @@ describe("today's and next 6 rounds of charades valid", () => {
       expect(charade.answer).toBeDefined();
       expect(charade.answer).not.toBeNull();
       expect(charade.answer).toHaveLength(5);
-      // eslint-disable-next-line @next/next/no-img-element
-      render(<img src={`https://s3.us-east-2.amazonaws.com/charades.ai/images/${charadeId}.jpg`} alt="ai-generated image"/>)
-      const displayedImage = screen.getByAltText("ai-generated image");
-      expect(displayedImage).toBeTruthy();
-      expect(displayedImage.src).toContain(`${charadeId}.jpg`);
+      expect(s3objects).toContain(`images/${charadeId}.jpg`);
+      for (let i = 1; i < 5; i++) {
+        expect(s3objects).toContain(`images/${charadeId}-${i}.jpg`);
+      }
     })
   );
 });
