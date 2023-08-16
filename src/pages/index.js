@@ -125,6 +125,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
+  const [winStreak, setWinStreak] = useState(0);
+  const [completionStreak, setCompletionStreak] = useState(0);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
   const [showWordListError, setShowWordListError] = useState(false);
@@ -136,17 +138,23 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
 
   // get game state from localStorage upon render
   useEffect(() => {
+    let winToday = false;
+    let completionToday = false;
     const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
     if (savedGameState) {
       const parsedGameState = JSON.parse(savedGameState);
       setGuesses(parsedGameState.guesses);
       setGameFinished(parsedGameState.gameFinished);
+      winToday = parsedGameState.gameWon;
+      completionToday = parsedGameState.gameFinished;
+
       setGameWon(parsedGameState.gameWon);
       generateLetterDict(parsedGameState.guesses);
       if (parsedGameState.gameFinished) {
         setModalOpenId(modalIDs.GameFinished);
       }
     }
+    updateStreak(winToday, completionToday);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charadeIndex]);
 
@@ -166,15 +174,22 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   useEffect(() => {
     if (gameWon && gameFinished) {
       updateShareString(gameWon);
+      updateStreak(gameWon, gameFinished);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     } else if (gameFinished) {
       updateShareString(gameWon);
+      updateStreak(gameWon, gameFinished);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameFinished, gameWon]);
+
+  useEffect(() => {
+    console.log(`win streak: ${winStreak}`);
+    console.log(`completion streak: ${completionStreak}`);
+  }, [winStreak, completionStreak]);
 
   function updateShareString(gameWon) {
     let updatingShareString = `${shareString}`
@@ -190,13 +205,44 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     setShareString(updatingShareString);
   }
 
+  function updateStreak(gameWon, gameFinished) {
+    let winStreakBrokenIndex = 0;
+    let completionStreakBrokenIndex = 0;
+    let charadeIndexInt = parseInt(charadeIndex);
+    for (let i = charadeIndexInt - 1; i > 0; i--) {
+      const savedGameState = localStorage.getItem(`charades-${i}`);
+      if (savedGameState) {
+        const parsedGameState = JSON.parse(savedGameState);
+        if (!parsedGameState.gameWon && winStreakBrokenIndex === 0) {
+          winStreakBrokenIndex = i;
+        }
+        if (!parsedGameState.gameFinished && completionStreakBrokenIndex === 0) {
+          completionStreakBrokenIndex = i;
+        }
+      } else {
+        if (winStreakBrokenIndex === 0) {
+          winStreakBrokenIndex = i;
+        }
+        if (completionStreakBrokenIndex === 0) {
+          completionStreakBrokenIndex = i;
+        }
+      }
+    }
+    setWinStreak(charadeIndexInt + (
+      gameWon ? 1 : 0
+    ) - winStreakBrokenIndex - 1);
+    setCompletionStreak(charadeIndexInt + (
+      gameFinished ? 1 : 0
+    ) - completionStreakBrokenIndex - 1);
+  }
+
   // save game state to localStorage
   function saveGame() {
     localStorage.setItem(`charades-${charadeIndex}`, JSON.stringify({
       guesses: guesses,
       gameFinished: gameFinished,
       gameWon: gameWon,
-    }))
+    }));
   }
 
   // set emojis for feedback and answer (what is stored in guesses)
@@ -324,7 +370,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         />
         <meta
           name="description"
-          content="charades with ai"
+          content="play charades with ai! powered by openai's dall·e."
         />
         <meta
           property="og:image"
@@ -381,6 +427,22 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               </button>
             </div>
           </div>
+          <div className="flex flex-row justify-center space-x-5 align-middle mb-1">
+            <div className="tooltip tooltip-bottom" data-tip={`${winStreak} day win streak`}>
+              <div
+                style={winStreak < 1 ? { opacity: "20%", textShadow: "0 0 0 gray" } : {}}
+              >
+                {`🔥 ${winStreak}`}
+              </div>
+            </div>
+            <div className="tooltip tooltip-bottom" data-tip={`${completionStreak} day completion streak`}>
+              <div
+                style={completionStreak < 1 ? { opacity: "20%", textShadow: "0 0 0 gray" } : {}}
+              >
+                {`✅ ${completionStreak}`}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="divider my-0"></div>
         <div className="max-w-md w-full mx-auto text-center">
@@ -423,7 +485,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
                 </svg>
-                Play Again <div className="badge text-blue-500">$0.50</div>
+                Bonus Round <div className="badge text-blue-500">$0.50</div>
               </button>
             </>
           )}
@@ -521,12 +583,12 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           </div>
           <div className="flex justify-center w-full py-2 gap-2">
             {(guesses.length > 0 || gameFinished) && (<>
-              <a href="#pic1" className="btn btn-xs">1</a> 
-              <a href="#pic2" className="btn btn-xs">2</a> 
+              <a href="#pic1" className="btn btn-xs bg-gray-100">1</a> 
+              <a href="#pic2" className="btn btn-xs bg-gray-100">2</a> 
             </>)}
-            {(guesses.length > 1 || gameFinished) && (<a href="#pic3" className="btn btn-xs">3</a>)}
-            {(guesses.length > 2 || gameFinished) && (<a href="#pic4" className="btn btn-xs">4</a>)}
-            {(guesses.length > 3 || gameFinished) && (<a href="#pic5" className="btn btn-xs">5</a>)}
+            {(guesses.length > 1 || gameFinished) && (<a href="#pic3" className="btn btn-xs bg-gray-100">3</a>)}
+            {(guesses.length > 2 || gameFinished) && (<a href="#pic4" className="btn btn-xs bg-gray-100">4</a>)}
+            {(guesses.length > 3 || gameFinished) && (<a href="#pic5" className="btn btn-xs bg-gray-100">5</a>)}
           </div>
           <p className="text-xs italic">generated by <a
             href={"https://openai.com/blog/dall-e/"}
@@ -616,7 +678,21 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <p className="py-2">
               the answer was <b>{answerString}</b>.
             </p>
-            <p className="py-2">time until next round of charades: <CharadeCountdown /></p>
+            <p className="py-2">
+              tune in tomorrow to keep your streak alive:
+            </p>
+            <div className="flex flex-row justify-start space-x-5 align-middle mb-1">
+              <div>
+                {`🔥 ${winStreak} day win streak`}
+              </div>
+              <div>
+                {`✅ ${completionStreak} day completion streak`}
+              </div>
+            </div>
+            <p className="py-2">
+              building up your streak will unlock bonus rounds in the future.
+            </p>
+            <p className="py-2">time until next round of charades: <b><CharadeCountdown/></b></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
                 text={shareString}
@@ -641,7 +717,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                   <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
                 </svg>
-                Play Again
+                Bonus Round
                 <div className="badge text-blue-500">$0.50</div>
               </button>
             </div>
@@ -671,17 +747,17 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               coming soon 👀
             </h3>
             <p className="py-2">
-              thanks for enjoying the game! we haven&apos;t finished building the 
-              ability to play again, but it&apos;s coming soon along with some other features:
+              thanks for enjoying the game! we haven&apos;t finished building bonus rounds, 
+              but it&apos;s coming soon along with some other features:
             </p>
             <p className="ml-2 py-2">
-              ✨ play as many rounds as you want per day
+              ✨ unlock bonus rounds with streaks
             </p>
             <p className="ml-2 py-2">
               🎯 longer prompts for more difficulty
             </p>
             <p className="ml-2 py-2">
-              💲 buy packs of rounds and save money
+              💲 buy packs of bonus rounds
             </p>
             <p className="py-2">
               let us know if there&apos;s anything else you&apos;d like to see 👇
@@ -739,6 +815,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               After each guess, if your answer was incorrect, you will
               be given hints about the letters in your guess as well as 
               a new picture generated from the same prompt.
+            </p>
+            <p className="py-2">
+              You can build streaks for both winning (🔥) and completing (✅) rounds of charades. 
+              Building up your streak will unlock bonuses in the future.
             </p>
             <div className="divider my-0"></div>
             <h4 className="font-semibold">
