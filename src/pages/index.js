@@ -125,6 +125,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
+  const [winStreak, setWinStreak] = useState(0);
+  const [completionStreak, setCompletionStreak] = useState(0);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
   const [showWordListError, setShowWordListError] = useState(false);
@@ -136,17 +138,23 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
 
   // get game state from localStorage upon render
   useEffect(() => {
+    let winToday = false;
+    let completionToday = false;
     const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
     if (savedGameState) {
       const parsedGameState = JSON.parse(savedGameState);
       setGuesses(parsedGameState.guesses);
       setGameFinished(parsedGameState.gameFinished);
+      winToday = parsedGameState.gameWon;
+      completionToday = parsedGameState.gameFinished;
+
       setGameWon(parsedGameState.gameWon);
       generateLetterDict(parsedGameState.guesses);
       if (parsedGameState.gameFinished) {
         setModalOpenId(modalIDs.GameFinished);
       }
     }
+    updateStreak(winToday, completionToday);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charadeIndex]);
 
@@ -166,15 +174,22 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   useEffect(() => {
     if (gameWon && gameFinished) {
       updateShareString(gameWon);
+      updateStreak(gameWon, gameFinished);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     } else if (gameFinished) {
       updateShareString(gameWon);
+      updateStreak(gameWon, gameFinished);
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameFinished, gameWon]);
+
+  useEffect(() => {
+    console.log(`win streak: ${winStreak}`);
+    console.log(`completion streak: ${completionStreak}`);
+  }, [winStreak, completionStreak]);
 
   function updateShareString(gameWon) {
     let updatingShareString = `${shareString}`
@@ -190,13 +205,43 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     setShareString(updatingShareString);
   }
 
+  function updateStreak(gameWon, gameFinished) {
+    let winStreakBrokenIndex = 0;
+    let completionStreakBrokenIndex = 0;
+    for (let i = charadeIndex - 1; i > 0; i--) {
+      const savedGameState = localStorage.getItem(`charades-${i}`);
+      if (savedGameState) {
+        const parsedGameState = JSON.parse(savedGameState);
+        if (!parsedGameState.gameWon && winStreakBrokenIndex === 0) {
+          winStreakBrokenIndex = i;
+        }
+        if (!parsedGameState.gameFinished && completionStreakBrokenIndex === 0) {
+          completionStreakBrokenIndex = i;
+        }
+      } else {
+        if (winStreakBrokenIndex === 0) {
+          winStreakBrokenIndex = i;
+        }
+        if (completionStreakBrokenIndex === 0) {
+          completionStreakBrokenIndex = i;
+        }
+      }
+    }
+    setWinStreak(charadeIndex + (
+      gameWon ? 1 : 0
+    ) - winStreakBrokenIndex - 1);
+    setCompletionStreak(charadeIndex + (
+      gameFinished ? 1 : 0
+    ) - completionStreakBrokenIndex - 1);
+  }
+
   // save game state to localStorage
   function saveGame() {
     localStorage.setItem(`charades-${charadeIndex}`, JSON.stringify({
       guesses: guesses,
       gameFinished: gameFinished,
       gameWon: gameWon,
-    }))
+    }));
   }
 
   // set emojis for feedback and answer (what is stored in guesses)
