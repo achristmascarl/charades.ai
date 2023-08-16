@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 
-import { MongoClient } from "mongodb"
+// import { MongoClient } from "mongodb"
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import { track, wordList } from "../utils";
@@ -15,48 +15,49 @@ export async function getStaticProps() {
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
-  let client;
+  // TODO: uncomment for prod
+  // let client;
 
-  let url = process.env.MONGO_URL;
-  console.log(url);
-  if (!url) {
-    throw new Error(
-      "MONGO_URL environment variable undefined; did you prepend `railway run`?"
-    )
-  }
-  try {
-    client = await MongoClient.connect(url);
-    const database = client.db("production");
-    const charades = database.collection("charades");
+  // let url = process.env.MONGO_URL;
+  // console.log(url);
+  // if (!url) {
+  //   throw new Error(
+  //     "MONGO_URL environment variable undefined; did you prepend `railway run`?"
+  //   )
+  // }
+  // try {
+  //   client = await MongoClient.connect(url);
+  //   const database = client.db("production");
+  //   const charades = database.collection("charades");
 
-    // get charade for today
-    const date = new Date(Date.now());
-    date.setUTCHours(date.getUTCHours() - 4);
-    const isoString = date.toISOString();
-    const isoDateId = isoString.split("T")[0];
-    console.log(isoDateId);
-    const query = { isoDateId: isoDateId };
-    console.log(query);
-    const charade = await charades.findOne(query);
-    console.log(charade);
-    if (charade) {
-      charadeId = charade._id.toString();
-      console.log(charadeId);
-      if (charade.charadeIndex) {
-        charadeIndex = charade.charadeIndex;
-      }
-      if (charade.answer && charade.answer.toString().length > 0) {
-        answerString = charade.answer.toString().toLowerCase();
-      }
-    }
+  //   // get charade for today
+  //   const date = new Date(Date.now());
+  //   date.setUTCHours(date.getUTCHours() - 4);
+  //   const isoString = date.toISOString();
+  //   const isoDateId = isoString.split("T")[0];
+  //   console.log(isoDateId);
+  //   const query = { isoDateId: isoDateId };
+  //   console.log(query);
+  //   const charade = await charades.findOne(query);
+  //   console.log(charade);
+  //   if (charade) {
+  //     charadeId = charade._id.toString();
+  //     console.log(charadeId);
+  //     if (charade.charadeIndex) {
+  //       charadeIndex = charade.charadeIndex;
+  //     }
+  //     if (charade.answer && charade.answer.toString().length > 0) {
+  //       answerString = charade.answer.toString().toLowerCase();
+  //     }
+  //   }
 
-  } catch (err) {
-    console.log("error with mongodb: ");
-    console.log(err);
-    throw new Error(err)
-  } finally {
-    await client.close();
-  }
+  // } catch (err) {
+  //   console.log("error with mongodb: ");
+  //   console.log(err);
+  //   throw new Error(err)
+  // } finally {
+  //   await client.close();
+  // }
 
   return {
     props: {
@@ -427,6 +428,22 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               </button>
             </div>
           </div>
+          <div className="flex flex-row justify-center space-x-5 align-middle mb-1">
+            <div className="tooltip tooltip-bottom" data-tip={`${winStreak} day win streak`}>
+              <div
+                style={winStreak < 1 ? { opacity: "20%", textShadow: "0 0 0 gray" } : {}}
+              >
+                {`🔥 ${winStreak}`}
+              </div>
+            </div>
+            <div className="tooltip tooltip-bottom" data-tip={`${completionStreak} day completion streak`}>
+              <div
+                style={completionStreak < 1 ? { opacity: "20%", textShadow: "0 0 0 gray" } : {}}
+              >
+                {`✅ ${completionStreak}`}
+              </div>
+            </div>
+          </div>
         </div>
         <div className="divider my-0"></div>
         <div className="max-w-md w-full mx-auto text-center">
@@ -662,6 +679,20 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <p className="py-2">
               the answer was <b>{answerString}</b>.
             </p>
+            <p className="py-2">
+              tune in tomorrow to keep your streak alive:
+            </p>
+            <div className="flex flex-row justify-start space-x-5 align-middle mb-1">
+              <div>
+                {`🔥 ${winStreak} day win streak`}
+              </div>
+              <div>
+                {`✅ ${completionStreak} day completion streak`}
+              </div>
+            </div>
+            <p className="py-2">
+              building up your streak will unlock bonuses in the future.
+            </p>
             <p className="py-2">time until next round of charades: <CharadeCountdown /></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
@@ -785,6 +816,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
               After each guess, if your answer was incorrect, you will
               be given hints about the letters in your guess as well as 
               a new picture generated from the same prompt.
+            </p>
+            <p className="py-2">
+              You can build streaks for both winning (🔥) and completing (✅) rounds of charades. 
+              Building up your streak will unlock bonuses in the future.
             </p>
             <div className="divider my-0"></div>
             <h4 className="font-semibold">
