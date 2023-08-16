@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 
-// import { MongoClient } from "mongodb"
+import { MongoClient } from "mongodb"
 import { CopyToClipboard } from "react-copy-to-clipboard";
 
 import { track, wordList } from "../utils";
@@ -15,49 +15,48 @@ export async function getStaticProps() {
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
-  // TODO: uncomment for prod
-  // let client;
+  let client;
 
-  // let url = process.env.MONGO_URL;
-  // console.log(url);
-  // if (!url) {
-  //   throw new Error(
-  //     "MONGO_URL environment variable undefined; did you prepend `railway run`?"
-  //   )
-  // }
-  // try {
-  //   client = await MongoClient.connect(url);
-  //   const database = client.db("production");
-  //   const charades = database.collection("charades");
+  let url = process.env.MONGO_URL;
+  console.log(url);
+  if (!url) {
+    throw new Error(
+      "MONGO_URL environment variable undefined; did you prepend `railway run`?"
+    )
+  }
+  try {
+    client = await MongoClient.connect(url);
+    const database = client.db("production");
+    const charades = database.collection("charades");
 
-  //   // get charade for today
-  //   const date = new Date(Date.now());
-  //   date.setUTCHours(date.getUTCHours() - 4);
-  //   const isoString = date.toISOString();
-  //   const isoDateId = isoString.split("T")[0];
-  //   console.log(isoDateId);
-  //   const query = { isoDateId: isoDateId };
-  //   console.log(query);
-  //   const charade = await charades.findOne(query);
-  //   console.log(charade);
-  //   if (charade) {
-  //     charadeId = charade._id.toString();
-  //     console.log(charadeId);
-  //     if (charade.charadeIndex) {
-  //       charadeIndex = charade.charadeIndex;
-  //     }
-  //     if (charade.answer && charade.answer.toString().length > 0) {
-  //       answerString = charade.answer.toString().toLowerCase();
-  //     }
-  //   }
+    // get charade for today
+    const date = new Date(Date.now());
+    date.setUTCHours(date.getUTCHours() - 4);
+    const isoString = date.toISOString();
+    const isoDateId = isoString.split("T")[0];
+    console.log(isoDateId);
+    const query = { isoDateId: isoDateId };
+    console.log(query);
+    const charade = await charades.findOne(query);
+    console.log(charade);
+    if (charade) {
+      charadeId = charade._id.toString();
+      console.log(charadeId);
+      if (charade.charadeIndex) {
+        charadeIndex = charade.charadeIndex;
+      }
+      if (charade.answer && charade.answer.toString().length > 0) {
+        answerString = charade.answer.toString().toLowerCase();
+      }
+    }
 
-  // } catch (err) {
-  //   console.log("error with mongodb: ");
-  //   console.log(err);
-  //   throw new Error(err)
-  // } finally {
-  //   await client.close();
-  // }
+  } catch (err) {
+    console.log("error with mongodb: ");
+    console.log(err);
+    throw new Error(err)
+  } finally {
+    await client.close();
+  }
 
   return {
     props: {
