@@ -208,7 +208,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   function updateStreak(gameWon, gameFinished) {
     let winStreakBrokenIndex = 0;
     let completionStreakBrokenIndex = 0;
-    for (let i = charadeIndex - 1; i > 0; i--) {
+    let charadeIndexInt = parseInt(charadeIndex);
+    for (let i = charadeIndexInt - 1; i > 0; i--) {
       const savedGameState = localStorage.getItem(`charades-${i}`);
       if (savedGameState) {
         const parsedGameState = JSON.parse(savedGameState);
@@ -227,10 +228,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         }
       }
     }
-    setWinStreak(charadeIndex + (
+    setWinStreak(charadeIndexInt + (
       gameWon ? 1 : 0
     ) - winStreakBrokenIndex - 1);
-    setCompletionStreak(charadeIndex + (
+    setCompletionStreak(charadeIndexInt + (
       gameFinished ? 1 : 0
     ) - completionStreakBrokenIndex - 1);
   }
@@ -369,7 +370,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         />
         <meta
           name="description"
-          content="charades with ai"
+          content="play charades with ai! powered by openai's dall·e."
         />
         <meta
           property="og:image"
