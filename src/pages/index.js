@@ -664,9 +664,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         />
         <label
           htmlFor="game-finished-modal"
-          className="modal items-baseline cursor-pointer z-40"
+          className="modal cursor-pointer z-40"
         >
-          <label className="modal-box relative mt-24" htmlFor="">
+          <label className="modal-box relative" htmlFor="">
             <label htmlFor="game-finished-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 className="text-lg font-bold">
               {gameWon ? (
