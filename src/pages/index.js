@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 
@@ -155,8 +155,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       }
     }
     updateStreak(winToday, completionToday);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [charadeIndex]);
+  }, [charadeIndex, generateLetterDict, updateStreak]);
 
   // save game, generate hints, and navigate to new picture
   // when guesses change
@@ -167,8 +166,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       const cleanUrl = window.location.href.split("#")[0];
       window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guesses]);
+  }, [guesses, generateLetterDict, saveGame]);
 
   // check to see if the game is finished
   useEffect(() => {
@@ -183,15 +181,14 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       setModalOpenId(modalIDs.GameFinished);
       saveGame();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameFinished, gameWon]);
+  }, [gameFinished, gameWon, saveGame, updateShareString, updateStreak]);
 
   useEffect(() => {
     console.log(`win streak: ${winStreak}`);
     console.log(`completion streak: ${completionStreak}`);
   }, [winStreak, completionStreak]);
 
-  function updateShareString(gameWon) {
+  const updateShareString = useCallback((gameWon) => {
     let updatingShareString = `${shareString}`
     if (gameWon) {
       updatingShareString += ` ${guesses.length}/${numGuesses} \n`;
@@ -203,9 +200,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }
     updatingShareString += "\nhttps://charades.ai"
     setShareString(updatingShareString);
-  }
+  }, [guesses, shareString]);
 
-  function updateStreak(gameWon, gameFinished) {
+  const updateStreak = useCallback((gameWon, gameFinished) => {
     let winStreakBrokenIndex = 0;
     let completionStreakBrokenIndex = 0;
     let charadeIndexInt = parseInt(charadeIndex);
@@ -234,16 +231,16 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     setCompletionStreak(charadeIndexInt + (
       gameFinished ? 1 : 0
     ) - completionStreakBrokenIndex - 1);
-  }
+  }, [charadeIndex]);
 
   // save game state to localStorage
-  function saveGame() {
+  const saveGame = useCallback(() => {
     localStorage.setItem(`charades-${charadeIndex}`, JSON.stringify({
       guesses: guesses,
       gameFinished: gameFinished,
       gameWon: gameWon,
     }));
-  }
+  }, [charadeIndex, guesses, gameFinished, gameWon]);
 
   // set emojis for feedback and answer (what is stored in guesses)
   useEffect(() => {
@@ -321,7 +318,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }
   }
 
-  function generateLetterDict(guesses) {
+  const generateLetterDict = useCallback((guesses) => {
     const newLetterDict = {...letterDict};
     for (let i = 0; i < guesses.length; i++) {
       const guess = guesses[i].guessString;
@@ -341,7 +338,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
       }
     }
     setLetterDict(newLetterDict);
-  }
+  }, [answerArray, letterDict]);
 
   function handleShareResults() {
     setShowCopiedAlert(true);
