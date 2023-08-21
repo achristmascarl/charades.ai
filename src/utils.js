@@ -2328,6 +2328,7 @@ const answerList = [
 ];
 
 const wordList = [
+  "ligma",
   "aahed",
   "aalii",
   "aapas",
