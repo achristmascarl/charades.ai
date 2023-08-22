@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { c } from "../utils";
 
-const GuessResult = memo(function GuessResult({ index, guesses, processingGuess }) {
+const GuessResult = memo(function GuessResult({ index, guesses, processingGuess, isIos }) {
   const guess = guesses[index];
   const currentlyProcessing = index + 1 === guesses.length;
 
@@ -19,7 +19,7 @@ const GuessResult = memo(function GuessResult({ index, guesses, processingGuess 
           <div className="pl-1 font-mono tracking-[.45em]">
             {guess.guessString}
           </div>
-          <div>
+          <div className={isIos ? "text-xs" : "text-base"}>
             {guess.guessEmojis}
           </div>
         </div>

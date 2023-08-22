@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 
@@ -81,7 +81,34 @@ const LetterStates = {
   CorrectSpot3: "CorrectSpot3",
   CorrectSpot4: "CorrectSpot4"
 };
-
+const letterDict = {
+  a: [],
+  b: [],
+  c: [],
+  d: [],
+  e: [],
+  f: [],
+  g: [],
+  h: [],
+  i: [],
+  j: [],
+  k: [],
+  l: [],
+  m: [],
+  n: [],
+  o: [],
+  p: [],
+  q: [],
+  r: [],
+  s: [],
+  t: [],
+  u: [],
+  v: [],
+  w: [],
+  x: [],
+  y: [],
+  z: [],
+};
 const modalIDs = {
   GameFinished: "GameFinished",
   ComingSoon: "ComingSoon",
@@ -91,37 +118,10 @@ const modalIDs = {
 const referralParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
 
 export default function Home({ charadeIndex, answerString, charadeId }) {
+  const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
   const [feedbackEmojis, setFeedbackEmojis] = useState("");
   const [answerEmojis, setAnswerEmojis] = useState("");
-  const [letterDict, setLetterDict] = useState({
-    a: [],
-    b: [],
-    c: [],
-    d: [],
-    e: [],
-    f: [],
-    g: [],
-    h: [],
-    i: [],
-    j: [],
-    k: [],
-    l: [],
-    m: [],
-    n: [],
-    o: [],
-    p: [],
-    q: [],
-    r: [],
-    s: [],
-    t: [],
-    u: [],
-    v: [],
-    w: [],
-    x: [],
-    y: [],
-    z: [],
-  });
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState([]);
@@ -131,81 +131,38 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
   const [showWordListError, setShowWordListError] = useState(false);
   const [showRepeatError, setShowRepeatError] = useState(false);
-  const [shareString, setShareString] = useState(`🎭 r${charadeIndex}`);
   const [processingGuess, setProcessingGuess] = useState(false);
 
   const answerArray = answerString.split("");
 
-  // get game state from localStorage upon render
+  // check if ios using deprecated method
+  // (no good comprehensive alt yet)
   useEffect(() => {
-    let winToday = false;
-    let completionToday = false;
-    const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
-    if (savedGameState) {
-      const parsedGameState = JSON.parse(savedGameState);
-      setGuesses(parsedGameState.guesses);
-      setGameFinished(parsedGameState.gameFinished);
-      winToday = parsedGameState.gameWon;
-      completionToday = parsedGameState.gameFinished;
+    setIsIos(
+      /iPad|iPhone|iPod/.test(
+        window?.navigator?.platform
+      ) || (
+        window?.navigator?.platform === "MacIntel" &&
+        navigator.maxTouchPoints > 1
+      )
+    )
+  }, []);
 
-      setGameWon(parsedGameState.gameWon);
-      generateLetterDict(parsedGameState.guesses);
-      if (parsedGameState.gameFinished) {
-        setModalOpenId(modalIDs.GameFinished);
-      }
-    }
-    updateStreak(winToday, completionToday);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [charadeIndex]);
-
-  // save game, generate hints, and navigate to new picture
-  // when guesses change
-  useEffect(() => {
-    if (guesses.length > 0) {
-      saveGame();
-      generateLetterDict(guesses);
-      const cleanUrl = window.location.href.split("#")[0];
-      window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guesses]);
-
-  // check to see if the game is finished
-  useEffect(() => {
-    if (gameWon && gameFinished) {
-      updateShareString(gameWon);
-      updateStreak(gameWon, gameFinished);
-      setModalOpenId(modalIDs.GameFinished);
-      saveGame();
-    } else if (gameFinished) {
-      updateShareString(gameWon);
-      updateStreak(gameWon, gameFinished);
-      setModalOpenId(modalIDs.GameFinished);
-      saveGame();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameFinished, gameWon]);
-
-  useEffect(() => {
-    console.log(`win streak: ${winStreak}`);
-    console.log(`completion streak: ${completionStreak}`);
-  }, [winStreak, completionStreak]);
-
-  function updateShareString(gameWon) {
-    let updatingShareString = `${shareString}`
+  const getShareString = useCallback(() => {
+    let shareString = `🎭 r${charadeIndex}`
     if (gameWon) {
-      updatingShareString += ` ${guesses.length}/${numGuesses} \n`;
+      shareString += ` ${guesses.length}/${numGuesses} \n`;
     } else {
-      updatingShareString += ` X/${numGuesses} \n`;
+      shareString += ` X/${numGuesses} \n`;
     }
     for (let i = 0; i < guesses.length; i++) {
-      updatingShareString += `${guesses[i].guessEmojis} \n`;
+      shareString += `${guesses[i].guessEmojis} \n`;
     }
-    updatingShareString += "\nhttps://charades.ai"
-    setShareString(updatingShareString);
-  }
+    shareString += "https://charades.ai"
+    return shareString;
+  }, [charadeIndex, guesses, gameWon]);
 
-  function updateStreak(gameWon, gameFinished) {
+  const updateStreak = useCallback((gameWon, gameFinished) => {
     let winStreakBrokenIndex = 0;
     let completionStreakBrokenIndex = 0;
     let charadeIndexInt = parseInt(charadeIndex);
@@ -234,44 +191,16 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     setCompletionStreak(charadeIndexInt + (
       gameFinished ? 1 : 0
     ) - completionStreakBrokenIndex - 1);
-  }
+  }, [charadeIndex]);
 
   // save game state to localStorage
-  function saveGame() {
+  const saveGame = useCallback((guesses, gameFinished, gameWon) => {
     localStorage.setItem(`charades-${charadeIndex}`, JSON.stringify({
       guesses: guesses,
       gameFinished: gameFinished,
       gameWon: gameWon,
     }));
-  }
-
-  // set emojis for feedback and answer (what is stored in guesses)
-  useEffect(() => {
-    let feedbackEmojiString = "";
-    let answerEmojiString = "";
-    for (let i = 0; i < guess.length; i++) {
-      if (letterDict[guess.charAt(i)].includes(LetterStates[`CorrectSpot${i}`])) {
-        feedbackEmojiString += "🟩";
-      } else if (letterDict[guess.charAt(i)].includes(LetterStates[`WrongSpot${i}`])) {
-        feedbackEmojiString += "🟨";
-      } else if (letterDict[guess.charAt(i)].includes(LetterStates.NotPresent)) {
-        feedbackEmojiString += "🟥";
-      } else {
-        feedbackEmojiString += "⬜"
-      }
-
-      if (guess.charAt(i) === answerArray[i]) {
-        answerEmojiString += "🟩";
-      } else if (answerArray.includes(guess.charAt(i))) {
-        answerEmojiString += "🟨";
-      } else {
-        answerEmojiString += "🟥";
-      }
-    }
-    setFeedbackEmojis(feedbackEmojiString);
-    setAnswerEmojis(answerEmojiString);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [guess]);
+  }, [charadeIndex]);
 
   function processInput(e) {
     if (
@@ -301,6 +230,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         setGameWon(true);
         setGameFinished(true);
         track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
+        track(`win_streak", "streaks", "win_streak_${winStreak + 1}`);
+        track(`completion_streak", "streaks", "completion_streak_${completionStreak + 1}`);
       } else {
         track("guessed_wrong", "game_state", `guess_${addingNewGuess.length + 1}`);
       }
@@ -312,16 +243,16 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         setGameFinished(true);
         if (!(guess.toString() === answerString)){
           track("game_lost", "game_state", "game_lost");
+          track(`completion_streak", "streaks", "completion_streak_${completionStreak + 1}`);
         }
       }
       setGuesses(addingNewGuess);
       setGuess("");
-      saveGame();
       setTimeout(() => setProcessingGuess(false), 750);
     }
   }
 
-  function generateLetterDict(guesses) {
+  const generateLetterDict = useCallback((guesses) => {
     const newLetterDict = {...letterDict};
     for (let i = 0; i < guesses.length; i++) {
       const guess = guesses[i].guessString;
@@ -334,14 +265,11 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         if (answerArray[j] === letter) {
           letterState = LetterStates[`CorrectSpot${j}`]
         }
-
-        if (!letterDict[letter].includes(letterState)) {
-          newLetterDict[letter].push(letterState);
-        }
+        newLetterDict[letter].push(letterState);
       }
     }
-    setLetterDict(newLetterDict);
-  }
+    return newLetterDict;
+  }, [answerArray]);
 
   function handleShareResults() {
     setShowCopiedAlert(true);
@@ -350,6 +278,72 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
     }, 2500);
     track("click_share_results", "button_click", "share_results");
   }
+
+  // get game state from localStorage upon render
+  useEffect(() => {
+    const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
+    if (savedGameState) {
+      const parsedGameState = JSON.parse(savedGameState);
+      setGuesses(parsedGameState.guesses);
+      setGameFinished(parsedGameState.gameFinished);
+      setGameWon(parsedGameState.gameWon);
+    
+      if (parsedGameState.gameFinished) {
+        setModalOpenId(modalIDs.GameFinished);
+      }
+    }
+  }, [charadeIndex]);
+    
+  // save game, generate hints, and navigate to new picture
+  // when guesses change
+  useEffect(() => {
+    if (guesses.length > 0) {
+      saveGame(guesses, gameFinished, gameWon);
+      const cleanUrl = window.location.href.split("#")[0];
+      window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
+    }
+  }, [guesses, gameFinished, gameWon, saveGame]);
+    
+  // check to see if the game is finished
+  useEffect(() => {
+    if (gameWon && gameFinished) {
+      updateStreak(gameWon, gameFinished);
+      setModalOpenId(modalIDs.GameFinished);
+      saveGame(guesses, gameFinished, gameWon);
+    } else if (gameFinished) {
+      updateStreak(gameWon, gameFinished);
+      setModalOpenId(modalIDs.GameFinished);
+      saveGame(guesses, gameFinished, gameWon);
+    }
+  }, [guesses, gameFinished, gameWon, saveGame, updateStreak]);
+  
+  // set emojis for feedback and answer (what is stored in guesses)
+  useEffect(() => {
+    let feedbackEmojiString = "";
+    let answerEmojiString = "";
+    let letterDict = generateLetterDict(guesses);
+    for (let i = 0; i < guess.length; i++) {
+      if (letterDict[guess.charAt(i)].includes(LetterStates[`CorrectSpot${i}`])) {
+        feedbackEmojiString += "🟩";
+      } else if (letterDict[guess.charAt(i)].includes(LetterStates[`WrongSpot${i}`])) {
+        feedbackEmojiString += "🟨";
+      } else if (letterDict[guess.charAt(i)].includes(LetterStates.NotPresent)) {
+        feedbackEmojiString += "🟥";
+      } else {
+        feedbackEmojiString += "⬜"
+      }
+  
+      if (guess.charAt(i) === answerArray[i]) {
+        answerEmojiString += "🟩";
+      } else if (answerArray.includes(guess.charAt(i))) {
+        answerEmojiString += "🟨";
+      } else {
+        answerEmojiString += "🟥";
+      }
+    }
+    setFeedbackEmojis(feedbackEmojiString);
+    setAnswerEmojis(answerEmojiString);
+  }, [guess, answerArray, guesses, generateLetterDict]);
 
   return (
     <>
@@ -450,9 +444,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             {gameFinished ? (
               <>
                 {gameWon ? (
-                  "🎉 you won! the answer was "
+                  `🎉 you won round ${charadeIndex}! the answer was ` 
                 ) : (
-                  "maybe next time 😢 the answer was "
+                  `maybe next time 😢 the answer for round ${charadeIndex} was `
                 )}
                 <b>{answerString}</b>.
               </>
@@ -463,8 +457,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           {gameFinished && (
             <>
               <CopyToClipboard
-                text={shareString}
-                onCopy={() => handleShareResults()}
+                text={getShareString()}
+                onCopy={handleShareResults}
               >
                 <button
                   className="btn mx-2 my-3"
@@ -616,7 +610,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           </div>
           { guess && guess.length > 0 && 
             <p className="ml-4 mt-1 text-left">
-              {feedbackEmojis} (<span
+              <span className={isIos ? "text-xs" : "text-base"}>
+                {feedbackEmojis}
+              </span>(
+              <span
                 className="hover:underline text-blue-500 cursor-pointer"
                 onClick={() => {
                   setModalOpenId(modalIDs.Help);
@@ -636,7 +633,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
           {[...Array(numGuesses)].map((x, i) =>
-            <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} />
+            <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} isIos={isIos}/>
           )}
         </div>
         <div className="divider"></div>
@@ -670,9 +667,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <label htmlFor="game-finished-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 className="text-lg font-bold">
               {gameWon ? (
-                "🎉 you won!"
+                `🎉 you won round ${charadeIndex}!` 
               ) : (
-                "maybe next time 😢"
+                `maybe next time 😢 (round ${charadeIndex})`
               )}
             </h3>
             <p className="py-2">
@@ -695,8 +692,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <p className="py-2">time until next round of charades: <b><CharadeCountdown/></b></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
-                text={shareString}
-                onCopy={() => handleShareResults()}
+                text={getShareString()}
+                onCopy={handleShareResults}
               >
                 <button
                   className="btn mx-auto my-3"
