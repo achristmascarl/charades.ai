@@ -7,12 +7,28 @@ function c(...classNames) {
 }
 
 function track(action, category, label, value = 0, non_interaction = false) {
-  window.gtag("event", action, {
-    event_category: category,
-    event_label: label,
-    value,
-    non_interaction,
-  });
+  if (process.env.NODE_ENV === "production") {
+    window.gtag("event", action, {
+      event_category: category,
+      event_label: label,
+      value,
+      non_interaction,
+    });
+  } else {
+    console.debug(`[${
+      "TRACKING_OFF"
+    }] ${
+      action
+    }: category-${
+      category
+    }, label-${
+      label
+    }, value-${
+      value
+    }, non_interactive-${
+      non_interaction
+    }`);
+  }
 }
 
 const answerList = [
