@@ -118,6 +118,7 @@ const modalIDs = {
 const referralParams = "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
 
 export default function Home({ charadeIndex, answerString, charadeId }) {
+  const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
   const [feedbackEmojis, setFeedbackEmojis] = useState("");
   const [answerEmojis, setAnswerEmojis] = useState("");
@@ -133,6 +134,19 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const [processingGuess, setProcessingGuess] = useState(false);
 
   const answerArray = answerString.split("");
+
+  // check if ios using deprecated method
+  // (no good comprehensive alt yet)
+  useEffect(() => {
+    setIsIos(
+      /iPad|iPhone|iPod/.test(
+        window?.navigator?.platform
+      ) || (
+        window?.navigator?.platform === "MacIntel" &&
+        navigator.maxTouchPoints > 1
+      )
+    )
+  }, []);
 
   const getShareString = useCallback(() => {
     let shareString = `🎭 r${charadeIndex}`
@@ -596,7 +610,10 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           </div>
           { guess && guess.length > 0 && 
             <p className="ml-4 mt-1 text-left">
-              {feedbackEmojis} (<span
+              <span className={isIos ? "text-xs" : "text-base"}>
+                {feedbackEmojis}
+              </span>(
+              <span
                 className="hover:underline text-blue-500 cursor-pointer"
                 onClick={() => {
                   setModalOpenId(modalIDs.Help);
@@ -616,7 +633,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">results {!gameFinished && `(${numGuesses - guesses.length}/${numGuesses} guesses remaining)`}</h3>
           {[...Array(numGuesses)].map((x, i) =>
-            <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} />
+            <GuessResult key={i} index={i} guesses={guesses} answer={answerString} processingGuess={processingGuess} isIos={isIos}/>
           )}
         </div>
         <div className="divider"></div>
