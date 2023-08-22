@@ -427,9 +427,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             {gameFinished ? (
               <>
                 {gameWon ? (
-                  "🎉 you won! the answer was "
+                  `🎉 you won round ${charadeIndex}! the answer was ` 
                 ) : (
-                  "maybe next time 😢 the answer was "
+                  `maybe next time 😢 the answer for round ${charadeIndex} was `
                 )}
                 <b>{answerString}</b>.
               </>
@@ -647,9 +647,9 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <label htmlFor="game-finished-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 className="text-lg font-bold">
               {gameWon ? (
-                "🎉 you won!"
+                `🎉 you won round ${charadeIndex}!` 
               ) : (
-                "maybe next time 😢"
+                `maybe next time 😢 (round ${charadeIndex})`
               )}
             </h3>
             <p className="py-2">
