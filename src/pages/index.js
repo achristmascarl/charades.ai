@@ -282,17 +282,23 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   // get game state from localStorage upon render
   useEffect(() => {
     const savedGameState = localStorage.getItem(`charades-${charadeIndex}`);
+    let parsedGameWon = false;
+    let parsedGameFinished = false;
     if (savedGameState) {
       const parsedGameState = JSON.parse(savedGameState);
       setGuesses(parsedGameState.guesses);
       setGameFinished(parsedGameState.gameFinished);
       setGameWon(parsedGameState.gameWon);
+      parsedGameWon = parsedGameState.gameWon;
+      parsedGameFinished = parsedGameState.gameFinished;
     
       if (parsedGameState.gameFinished) {
         setModalOpenId(modalIDs.GameFinished);
       }
     }
-  }, [charadeIndex]);
+
+    updateStreak(parsedGameWon, parsedGameFinished);
+  }, [charadeIndex, updateStreak]);
     
   // save game, generate hints, and navigate to new picture
   // when guesses change
