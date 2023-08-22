@@ -216,6 +216,8 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         setGameWon(true);
         setGameFinished(true);
         track("game_won", "game_state", `game_won_${addingNewGuess.length + 1}`);
+        track(`win_streak", "streaks", "win_streak_${winStreak + 1}`);
+        track(`completion_streak", "streaks", "completion_streak_${completionStreak + 1}`);
       } else {
         track("guessed_wrong", "game_state", `guess_${addingNewGuess.length + 1}`);
       }
@@ -227,6 +229,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
         setGameFinished(true);
         if (!(guess.toString() === answerString)){
           track("game_lost", "game_state", "game_lost");
+          track(`completion_streak", "streaks", "completion_streak_${completionStreak + 1}`);
         }
       }
       setGuesses(addingNewGuess);
