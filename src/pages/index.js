@@ -135,17 +135,17 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
   const answerArray = answerString.split("");
 
   const getShareString = useCallback(() => {
-    let updatingShareString = `🎭 r${charadeIndex}`
+    let shareString = `🎭 r${charadeIndex}`
     if (gameWon) {
-      updatingShareString += ` ${guesses.length}/${numGuesses} \n`;
+      shareString += ` ${guesses.length}/${numGuesses} \n`;
     } else {
-      updatingShareString += ` X/${numGuesses} \n`;
+      shareString += ` X/${numGuesses} \n`;
     }
     for (let i = 0; i < guesses.length; i++) {
-      updatingShareString += `${guesses[i].guessEmojis} \n`;
+      shareString += `${guesses[i].guessEmojis} \n`;
     }
-    updatingShareString += "\nhttps://charades.ai"
-    return updatingShareString;
+    shareString += "https://charades.ai"
+    return shareString;
   }, [charadeIndex, guesses, gameWon]);
 
   const updateStreak = useCallback((gameWon, gameFinished) => {
@@ -440,7 +440,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
           {gameFinished && (
             <>
               <CopyToClipboard
-                text={getShareString}
+                text={getShareString()}
                 onCopy={handleShareResults}
               >
                 <button
@@ -672,7 +672,7 @@ export default function Home({ charadeIndex, answerString, charadeId }) {
             <p className="py-2">time until next round of charades: <b><CharadeCountdown/></b></p>
             <div className="w-full flex flex-col sm:flex-row space-between">
               <CopyToClipboard
-                text={getShareString}
+                text={getShareString()}
                 onCopy={handleShareResults}
               >
                 <button
