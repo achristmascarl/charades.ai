@@ -1,4 +1,4 @@
-function c(...classNames) {
+export function c(...classNames: string[]): string {
   return classNames
     .filter(v => v)
     .join(" ")
@@ -6,7 +6,13 @@ function c(...classNames) {
     .replace(/\s{2,}/g, " ");
 }
 
-function track(action, category, label, value = 0, non_interaction = false) {
+export function track(
+  action: string,
+  category: string,
+  label:string,
+  value = 0,
+  non_interaction = false
+): void {
   if (process.env.NODE_ENV === "production") {
     window.gtag("event", action, {
       event_category: category,
@@ -31,7 +37,7 @@ function track(action, category, label, value = 0, non_interaction = false) {
   }
 }
 
-const answerList = [
+export const answerList = [
   "cigar",
   "rebut",
   "sissy",
@@ -2343,7 +2349,7 @@ const answerList = [
   "shave",
 ];
 
-const wordList = [
+export const wordList = [
   "ligma",
   "aahed",
   "aalii",
@@ -17201,5 +17207,3 @@ const wordList = [
   "zymes",
   "zymic",
 ]
-
-module.exports = { c, track, answerList, wordList };
