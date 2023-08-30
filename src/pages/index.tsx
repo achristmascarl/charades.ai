@@ -293,7 +293,7 @@ export default function Home({
 
   const generateLetterDict = useCallback(
     (guesses: Guess[]) => {
-      const newLetterDict = { ...letterDict };
+      const newLetterDict = { ...LetterDict };
       for (let i = 0; i < guesses.length; i++) {
         const guess = guesses[i].guessString;
         for (let j = 0; j < guess.length; j++) {
@@ -374,19 +374,21 @@ export default function Home({
     let letterDict = generateLetterDict(guesses);
     for (let i = 0; i < guess.length; i++) {
       if (
-        letterDict[guess.charAt(i)].includes(
+        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
           LetterStates[`CorrectSpot${i}` as keyof typeof LetterStates],
         )
       ) {
         feedbackEmojiString += "🟩";
       } else if (
-        letterDict[guess.charAt(i)].includes(
+        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
           LetterStates[`WrongSpot${i}` as keyof typeof LetterStates],
         )
       ) {
         feedbackEmojiString += "🟨";
       } else if (
-        letterDict[guess.charAt(i)].includes(LetterStates.NotPresent)
+        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
+          LetterStates.NotPresent,
+        )
       ) {
         feedbackEmojiString += "🟥";
       } else {
@@ -871,7 +873,6 @@ export default function Home({
               key={i}
               index={i}
               guesses={guesses}
-              answer={answerString}
               processingGuess={processingGuess}
               isIos={isIos}
             />
@@ -897,7 +898,7 @@ export default function Home({
           type="checkbox"
           id="game-finished-modal"
           className="modal-toggle"
-          checked={modalOpenId && modalOpenId === modalIDs.GameFinished}
+          checked={!!modalOpenId && modalOpenId === modalIDs.GameFinished}
           onChange={() =>
             setModalOpenId(
               modalOpenId === modalIDs.GameFinished
@@ -996,7 +997,7 @@ export default function Home({
           type="checkbox"
           id="coming-soon-modal"
           className="modal-toggle"
-          checked={modalOpenId && modalOpenId === modalIDs.ComingSoon}
+          checked={!!modalOpenId && modalOpenId === modalIDs.ComingSoon}
           onChange={() =>
             setModalOpenId(
               modalOpenId === modalIDs.ComingSoon
