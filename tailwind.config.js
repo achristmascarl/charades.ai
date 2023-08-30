@@ -1,59 +1,57 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
   daisyui: {
     themes: [
       {
         birb: {
-          "primary": "#1566B0",
-          "secondary": "#FFA630",
-          "accent": "#EBBAB9",
-          "neutral": "#000000",
+          primary: "#1566B0",
+          secondary: "#FFA630",
+          accent: "#EBBAB9",
+          neutral: "#000000",
           "base-100": "#ffffff",
-        }
-      }
+        },
+      },
     ],
   },
   theme: {
     extend: {
       colors: {
-        "teal": {
+        teal: {
           DEFAULT: "#2A7B88",
         },
-        "koamaru": {
+        koamaru: {
           DEFAULT: "#3D315B",
         },
-        "jazzberry": {
+        jazzberry: {
           DEFAULT: "#991862",
         },
-        "independence": {
+        independence: {
           DEFAULT: "#425569",
         },
-        "asparagus": {
+        asparagus: {
           DEFAULT: "#7EA16B",
         },
-        "spanish": {
+        spanish: {
           DEFAULT: "#EBBAB9",
         },
-        "vermillion": {
+        vermillion: {
           DEFAULT: "#CC444B",
         },
-        "pastel": {
+        pastel: {
           DEFAULT: "#B0D0D3",
         },
-        "apricot": {
+        apricot: {
           DEFAULT: "#FCD7AD",
         },
-        "saffron": {
+        saffron: {
           DEFAULT: "#FFA630",
         },
-        "birb": {
+        birb: {
           DEFAULT: "#1566B0",
         },
       },
     },
   },
   plugins: [require("daisyui")],
-}
+};

@@ -73,14 +73,16 @@ for (let i = 0; i < generationInfo.length ; i++) {
         try {
           const imageUrl = response.data.data[j].url;
           console.log(imageUrl);
-          const file = fs.createWriteStream(`tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`);
+          const file =
+            fs.createWriteStream(`tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`);
           https.get(imageUrl, function(response) {
             response.pipe(file);
           });
         
           file.on("close", async () => {
             console.log(`File ${j + 1} written for prompt ${i}!`);
-            const blob = fs.readFileSync(`tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`);
+            const blob =
+              fs.readFileSync(`tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`);
             file.close();
             console.log(blob);
             const params = {

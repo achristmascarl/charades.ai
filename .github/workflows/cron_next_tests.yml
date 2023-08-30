@@ -30,7 +30,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Tests
-        run: railway run yarn test
+        run: yarn test
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
