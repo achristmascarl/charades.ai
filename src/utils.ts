@@ -1,6 +1,6 @@
 export function c(...classNames: string[]): string {
   return classNames
-    .filter(v => v)
+    .filter((v) => v)
     .join(" ")
     .trim()
     .replace(/\s{2,}/g, " ");
@@ -9,9 +9,9 @@ export function c(...classNames: string[]): string {
 export function track(
   action: string,
   category: string,
-  label:string,
+  label: string,
   value = 0,
-  non_interaction = false
+  non_interaction = false,
 ): void {
   if (process.env.NODE_ENV === "production") {
     window.gtag("event", action, {
@@ -21,19 +21,12 @@ export function track(
       non_interaction,
     });
   } else {
-    console.debug(`[${
-      "TRACKING_OFF"
-    }] ${
-      action
-    }: category-${
-      category
-    }, label-${
-      label
-    }, value-${
-      value
-    }, non_interactive-${
-      non_interaction
-    }`);
+    console.debug(
+      `[${"TRACKING_OFF"}] ` +
+        `${action}: category-${category}, ` +
+        `label-${label}, value-${value}, ` +
+        `non_interactive-${non_interaction}`,
+    );
   }
 }
 
@@ -17206,4 +17199,4 @@ export const wordList = [
   "zygon",
   "zymes",
   "zymic",
-]
+];

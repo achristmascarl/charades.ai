@@ -13,7 +13,7 @@ export default function CharadeCountdown() {
     const currentDate = new Date(Date.now());
     utcDate.setUTCHours(utcDate.getUTCHours() + 20);
     utcDate.setUTCHours(4, 0, 0, 0);
-    const msTimeDiff = utcDate - currentDate;
+    const msTimeDiff = utcDate.valueOf() - currentDate.valueOf();
     let seconds = Math.floor(msTimeDiff / 1000);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
@@ -25,7 +25,5 @@ export default function CharadeCountdown() {
     setCountdownString(`${stringHours}:${stringMinutes}:${stringSeconds}`);
   }
 
-  return (
-    <>{countdownString}</>
-  );
+  return <>{countdownString}</>;
 }
