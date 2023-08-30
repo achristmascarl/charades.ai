@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "railway run next dev & yarn ts:watch",
     "build": "next build",
     "start": "next start",
     "rr:dev": "railway run next dev",
@@ -18,7 +18,9 @@
     "generate": "node scripts/generateCharades.js",
     "rr:generate": "railway run node scripts/generateCharades.js",
     "openai:play": "node scripts/testOpenAI.mjs",
-    "cleanup": "./scripts/cleanup.sh"
+    "cleanup": "./scripts/cleanup.sh",
+    "ts": "tsc --noEmit --incremental",
+    "ts:watch": "yarn ts --watch"
   },
   "dependencies": {
     "daisyui": "^3.5.1",
