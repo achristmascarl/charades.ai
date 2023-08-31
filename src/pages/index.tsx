@@ -108,7 +108,6 @@ export default function Home({
   const [showWordListError, setShowWordListError] = useState(false);
   const [showRepeatError, setShowRepeatError] = useState(false);
   const [processingGuess, setProcessingGuess] = useState(false);
-  const guessInputRef = useRef<HTMLInputElement>(null);
 
   const answerArray = answerString.split("");
 
@@ -200,13 +199,11 @@ export default function Home({
   function handleGuess() {
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
-      guessInputRef.current?.focus();
       setTimeout(() => {
         setShowWordListError(false);
       }, 3000);
     } else if (guesses.map((guess) => guess.guessString).includes(guess)) {
       setShowRepeatError(true);
-      guessInputRef.current?.focus();
       setTimeout(() => {
         setShowRepeatError(false);
       }, 3000);
@@ -293,13 +290,6 @@ export default function Home({
     }, 2500);
     track("click_share_results", "button_click", "share_results");
   }
-
-  // refocus input after guesses
-  useEffect(() => {
-    if (!processingGuess && !gameWon && !gameFinished) {
-      guessInputRef.current?.focus();
-    }
-  }, [processingGuess, gameWon, gameFinished]);
 
   // get game state from localStorage upon render
   useEffect(() => {
@@ -413,7 +403,7 @@ export default function Home({
           "min-h-screen overflow-x-hidden content-center sm:p-10 p-3 pt-3"
         }
       >
-        <div className="toast toast-top toast-center z-50 w-full max-w-lg">
+        <div className={"toast toast-top toast-center z-50 w-full max-w-lg"}>
           {showCopiedAlert && (
             <div className="alert flex flex-row">
               <svg
@@ -797,7 +787,6 @@ export default function Home({
               value={guess}
               maxLength={5}
               disabled={gameFinished || processingGuess}
-              ref={guessInputRef}
             />
             <button
               className="btn ml-3 sm:block hidden"
