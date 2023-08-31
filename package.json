@@ -12,7 +12,7 @@
     "test:watch": "railway run jest --watch",
     "test:coverage": "railway run jest --coverage",
     "analyze": "railway run cross-env ANALYZE=true next build",
-    "generate": "railway run node scripts/generateCharades.mjs",
+    "generate": "tsc src/utils.ts && railway run node scripts/generateCharades.mjs",
     "openai:play": "railway run node scripts/testOpenAI.mjs",
     "cleanup": "./scripts/cleanup.sh",
     "ts": "tsc --noEmit --incremental",
