@@ -30,6 +30,54 @@ export function track(
   }
 }
 
+export const numGuesses = 5;
+
+export const referralParams =
+  "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
+
+export const LetterStates = {
+  NotPresent: "NotPresent",
+  WrongSpot0: "WrongSpot0",
+  WrongSpot1: "WrongSpot1",
+  WrongSpot2: "WrongSpot2",
+  WrongSpot3: "WrongSpot3",
+  WrongSpot4: "WrongSpot4",
+  CorrectSpot0: "CorrectSpot0",
+  CorrectSpot1: "CorrectSpot1",
+  CorrectSpot2: "CorrectSpot2",
+  CorrectSpot3: "CorrectSpot3",
+  CorrectSpot4: "CorrectSpot4",
+};
+
+export const LetterDict = {
+  a: [] as string[],
+  b: [] as string[],
+  c: [] as string[],
+  d: [] as string[],
+  e: [] as string[],
+  f: [] as string[],
+  g: [] as string[],
+  h: [] as string[],
+  i: [] as string[],
+  j: [] as string[],
+  k: [] as string[],
+  l: [] as string[],
+  m: [] as string[],
+  n: [] as string[],
+  o: [] as string[],
+  p: [] as string[],
+  q: [] as string[],
+  r: [] as string[],
+  s: [] as string[],
+  t: [] as string[],
+  u: [] as string[],
+  v: [] as string[],
+  w: [] as string[],
+  x: [] as string[],
+  y: [] as string[],
+  z: [] as string[],
+};
+
 export const answerList = [
   "cigar",
   "rebut",
