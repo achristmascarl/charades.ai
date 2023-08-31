@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ChangeEvent } from "react";
+import { useState, useEffect, useCallback, useRef, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
@@ -108,6 +108,7 @@ export default function Home({
   const [showWordListError, setShowWordListError] = useState(false);
   const [showRepeatError, setShowRepeatError] = useState(false);
   const [processingGuess, setProcessingGuess] = useState(false);
+  const guessInputRef = useRef<HTMLInputElement>(null);
 
   const answerArray = answerString.split("");
 
@@ -199,11 +200,13 @@ export default function Home({
   function handleGuess() {
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
+      guessInputRef.current?.focus();
       setTimeout(() => {
         setShowWordListError(false);
       }, 3000);
     } else if (guesses.map((guess) => guess.guessString).includes(guess)) {
       setShowRepeatError(true);
+      guessInputRef.current?.focus();
       setTimeout(() => {
         setShowRepeatError(false);
       }, 3000);
@@ -253,7 +256,9 @@ export default function Home({
       }
       setGuesses(addingNewGuess);
       setGuess("");
-      setTimeout(() => setProcessingGuess(false), 750);
+      setTimeout(() => {
+        setProcessingGuess(false);
+      }, 750);
     }
   }
 
@@ -288,6 +293,13 @@ export default function Home({
     }, 2500);
     track("click_share_results", "button_click", "share_results");
   }
+
+  // refocus input after guesses
+  useEffect(() => {
+    if (!processingGuess && !gameWon && !gameFinished) {
+      guessInputRef.current?.focus();
+    }
+  }, [processingGuess, gameWon, gameFinished]);
 
   // get game state from localStorage upon render
   useEffect(() => {
@@ -781,6 +793,7 @@ export default function Home({
               value={guess}
               maxLength={5}
               disabled={gameFinished || processingGuess}
+              ref={guessInputRef}
             />
             <button
               className="btn ml-3 sm:block hidden"
