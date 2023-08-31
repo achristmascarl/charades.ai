@@ -5,7 +5,7 @@ import Image from "next/future/image";
 import { MongoClient } from "mongodb";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Guess from "../models/Guess";
-import { track, wordList } from "../utils";
+import { track, wordList, LetterDict, LetterStates } from "../utils";
 import GuessResult from "../components/GuessResult";
 import CharadeCountdown from "../components/CharadeCountdown";
 import { placeholderSquareTinyBase64 } from "../../public/blurImages";
@@ -66,48 +66,8 @@ export async function getStaticProps() {
     revalidate: 60,
   };
 }
+
 const numGuesses = 5;
-const LetterStates = {
-  NotPresent: "NotPresent",
-  WrongSpot0: "WrongSpot0",
-  WrongSpot1: "WrongSpot1",
-  WrongSpot2: "WrongSpot2",
-  WrongSpot3: "WrongSpot3",
-  WrongSpot4: "WrongSpot4",
-  CorrectSpot0: "CorrectSpot0",
-  CorrectSpot1: "CorrectSpot1",
-  CorrectSpot2: "CorrectSpot2",
-  CorrectSpot3: "CorrectSpot3",
-  CorrectSpot4: "CorrectSpot4",
-};
-const LetterDict = {
-  a: [] as string[],
-  b: [] as string[],
-  c: [] as string[],
-  d: [] as string[],
-  e: [] as string[],
-  f: [] as string[],
-  g: [] as string[],
-  h: [] as string[],
-  i: [] as string[],
-  j: [] as string[],
-  k: [] as string[],
-  l: [] as string[],
-  m: [] as string[],
-  n: [] as string[],
-  o: [] as string[],
-  p: [] as string[],
-  q: [] as string[],
-  r: [] as string[],
-  s: [] as string[],
-  t: [] as string[],
-  u: [] as string[],
-  v: [] as string[],
-  w: [] as string[],
-  x: [] as string[],
-  y: [] as string[],
-  z: [] as string[],
-};
 const modalIDs = {
   GameFinished: "GameFinished",
   ComingSoon: "ComingSoon",
