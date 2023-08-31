@@ -413,7 +413,7 @@ export default function Home({
           "min-h-screen overflow-x-hidden content-center sm:p-10 p-3 pt-3"
         }
       >
-        <div className="toast toast-top toast-center z-50">
+        <div className="toast toast-top toast-center z-50 w-full max-w-lg">
           {showCopiedAlert && (
             <div className="alert flex flex-row">
               <svg
@@ -429,7 +429,9 @@ export default function Home({
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 ></path>
               </svg>
-              <span>Copied results to clipboard.</span>
+              <span className="whitespace-normal text-left">
+                Copied results to clipboard.
+              </span>
             </div>
           )}
           {showWordListError && (
@@ -448,7 +450,9 @@ export default function Home({
                   d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>Guess not in word list, please try again.</span>
+              <span className="whitespace-normal text-left">
+                Guess not in word list, please try again.
+              </span>
             </div>
           )}
           {showRepeatError && (
@@ -467,7 +471,7 @@ export default function Home({
                   d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>
+              <span className="whitespace-normal text-left">
                 You&apos;ve already guessed this word, please try again.
               </span>
             </div>
