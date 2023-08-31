@@ -30,6 +30,11 @@ export function track(
   }
 }
 
+export const numGuesses = 5;
+
+export const referralParams =
+  "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
+
 export const LetterStates = {
   NotPresent: "NotPresent",
   WrongSpot0: "WrongSpot0",
