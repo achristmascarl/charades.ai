@@ -787,6 +787,10 @@ export default function Home({
               value={guess}
               maxLength={5}
               disabled={gameFinished || processingGuess}
+              autoCapitalize={"none"}
+              autoComplete={"off"}
+              autoCorrect={"false"}
+              spellCheck={"false"}
             />
             <button
               className="btn ml-3 sm:block hidden"
