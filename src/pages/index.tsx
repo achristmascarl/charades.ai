@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, ChangeEvent } from "react";
+import { useState, useEffect, useCallback, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
