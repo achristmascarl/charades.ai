@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, ChangeEvent } from "react";
+import { useState, useEffect, useCallback, useMemo, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
@@ -97,7 +97,6 @@ export default function Home({
   const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
   const [feedbackEmojis, setFeedbackEmojis] = useState("");
-  const [answerEmojis, setAnswerEmojis] = useState("");
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState<Guess[]>([]);
@@ -110,16 +109,6 @@ export default function Home({
   const [processingGuess, setProcessingGuess] = useState(false);
 
   const answerArray = answerString.split("");
-
-  // check if ios using deprecated method
-  // (no good comprehensive alt yet)
-  useEffect(() => {
-    setIsIos(
-      /iPad|iPhone|iPod/.test(window?.navigator?.platform) ||
-        (window?.navigator?.platform === "MacIntel" &&
-          navigator.maxTouchPoints > 1),
-    );
-  }, []);
 
   const getShareString = useCallback(() => {
     let shareString = `🎭 r${charadeIndex}`;
@@ -136,7 +125,7 @@ export default function Home({
   }, [charadeIndex, guesses, gameWon]);
 
   const updateStreak = useCallback(
-    (gameWon: boolean, gameFinished: boolean) => {
+    (gameFinished: boolean, gameWon: boolean) => {
       let winStreakBrokenIndex = 0;
       let completionStreakBrokenIndex = 0;
       let charadeIndexInt = parseInt(charadeIndex);
@@ -209,7 +198,21 @@ export default function Home({
       }, 3000);
     } else {
       setProcessingGuess(true);
+      let answerEmojiString = "";
+      for (let i = 0; i < guess.length; i++) {
+        if (guess.charAt(i) === answerArray[i]) {
+          answerEmojiString += "🟩";
+        } else if (answerArray.includes(guess.charAt(i))) {
+          answerEmojiString += "🟨";
+        } else {
+          answerEmojiString += "🟥";
+        }
+      }
       const addingNewGuess = Array.from(guesses);
+      addingNewGuess.push({
+        guessString: guess.toString(),
+        guessEmojis: answerEmojiString,
+      });
       track(
         `guessed_${guess}`,
         "game_state",
@@ -229,27 +232,22 @@ export default function Home({
           "streaks",
           `completion_streak_${completionStreak + 1}`,
         );
+        handleGameCompletion(true, true);
+      } else if (addingNewGuess.length === numGuesses) {
+        setGameFinished(true);
+        track("game_lost", "game_state", "game_lost");
+        track(
+          "completion_streak",
+          "streaks",
+          `completion_streak_${completionStreak + 1}`,
+        );
+        handleGameCompletion(true, false);
       } else {
         track(
           "guessed_wrong",
           "game_state",
           `guess_${addingNewGuess.length + 1}`,
         );
-      }
-      addingNewGuess.push({
-        guessString: guess.toString(),
-        guessEmojis: answerEmojis,
-      });
-      if (addingNewGuess.length === numGuesses) {
-        setGameFinished(true);
-        if (!(guess.toString() === answerString)) {
-          track("game_lost", "game_state", "game_lost");
-          track(
-            "completion_streak",
-            "streaks",
-            `completion_streak_${completionStreak + 1}`,
-          );
-        }
       }
       setGuesses(addingNewGuess);
       setGuess("");
@@ -259,29 +257,11 @@ export default function Home({
     }
   }
 
-  const generateLetterDict = useCallback(
-    (guesses: Guess[]) => {
-      const newLetterDict = { ...LetterDict };
-      for (let i = 0; i < guesses.length; i++) {
-        const guess = guesses[i].guessString;
-        for (let j = 0; j < guess.length; j++) {
-          const letter: string = guess.charAt(j);
-          let letterState = LetterStates.NotPresent;
-          if (answerArray.includes(letter)) {
-            letterState =
-              LetterStates[`WrongSpot${j}` as keyof typeof LetterStates];
-          }
-          if (answerArray[j] === letter) {
-            letterState =
-              LetterStates[`CorrectSpot${j}` as keyof typeof LetterStates];
-          }
-          newLetterDict[letter as keyof typeof LetterDict].push(letterState);
-        }
-      }
-      return newLetterDict;
-    },
-    [answerArray],
-  );
+  function handleGameCompletion(finished: boolean, won: boolean) {
+    updateStreak(finished, won);
+    setModalOpenId(modalIDs.GameFinished);
+    saveGame(guesses, finished, won);
+  }
 
   function handleShareResults() {
     setShowCopiedAlert(true);
@@ -290,6 +270,16 @@ export default function Home({
     }, 2500);
     track("click_share_results", "button_click", "share_results");
   }
+
+  // check if ios using deprecated method
+  // (no good comprehensive alt yet)
+  useEffect(() => {
+    setIsIos(
+      /iPad|iPhone|iPod/.test(window?.navigator?.platform) ||
+        (window?.navigator?.platform === "MacIntel" &&
+          navigator.maxTouchPoints > 1),
+    );
+  }, []);
 
   // get game state from localStorage upon render
   useEffect(() => {
@@ -309,7 +299,7 @@ export default function Home({
       }
     }
 
-    updateStreak(parsedGameWon, parsedGameFinished);
+    updateStreak(parsedGameFinished, parsedGameWon);
   }, [charadeIndex, updateStreak]);
 
   // save game, generate hints, and navigate to new picture
@@ -322,24 +312,31 @@ export default function Home({
     }
   }, [guesses, gameFinished, gameWon, saveGame]);
 
-  // check to see if the game is finished
-  useEffect(() => {
-    if (gameWon && gameFinished) {
-      updateStreak(gameWon, gameFinished);
-      setModalOpenId(modalIDs.GameFinished);
-      saveGame(guesses, gameFinished, gameWon);
-    } else if (gameFinished) {
-      updateStreak(gameWon, gameFinished);
-      setModalOpenId(modalIDs.GameFinished);
-      saveGame(guesses, gameFinished, gameWon);
+  // memoized letter dict for hints
+  const letterDict = useMemo(() => {
+    const newLetterDict = { ...LetterDict };
+    for (let i = 0; i < guesses.length; i++) {
+      const guess = guesses[i].guessString;
+      for (let j = 0; j < guess.length; j++) {
+        const letter: string = guess.charAt(j);
+        let letterState = LetterStates.NotPresent;
+        if (answerArray.includes(letter)) {
+          letterState =
+            LetterStates[`WrongSpot${j}` as keyof typeof LetterStates];
+        }
+        if (answerArray[j] === letter) {
+          letterState =
+            LetterStates[`CorrectSpot${j}` as keyof typeof LetterStates];
+        }
+        newLetterDict[letter as keyof typeof LetterDict].push(letterState);
+      }
     }
-  }, [guesses, gameFinished, gameWon, saveGame, updateStreak]);
+    return newLetterDict;
+  }, [guesses, answerArray]);
 
   // set emojis for feedback and answer (what is stored in guesses)
   useEffect(() => {
     let feedbackEmojiString = "";
-    let answerEmojiString = "";
-    let letterDict = generateLetterDict(guesses);
     for (let i = 0; i < guess.length; i++) {
       if (
         letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
@@ -362,18 +359,9 @@ export default function Home({
       } else {
         feedbackEmojiString += "⬜";
       }
-
-      if (guess.charAt(i) === answerArray[i]) {
-        answerEmojiString += "🟩";
-      } else if (answerArray.includes(guess.charAt(i))) {
-        answerEmojiString += "🟨";
-      } else {
-        answerEmojiString += "🟥";
-      }
     }
     setFeedbackEmojis(feedbackEmojiString);
-    setAnswerEmojis(answerEmojiString);
-  }, [guess, answerArray, guesses, generateLetterDict]);
+  }, [guess, letterDict]);
 
   return (
     <>
