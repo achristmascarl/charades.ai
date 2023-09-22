@@ -5,7 +5,9 @@ export default function CharadeCountdown() {
 
   // get countdown clock
   useEffect(() => {
-    setInterval(() => getCountdownString(), 1000);
+    const interval = setInterval(() => getCountdownString(), 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   function getCountdownString() {
