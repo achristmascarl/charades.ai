@@ -33,6 +33,10 @@ to access environment variables for mongo (and perhaps other env variables added
 3. run `yarn generate` to run a script that generates 5 rounds of charades at a time
 4. run `yarn test` to make sure the next several rounds are valid
 
+## testing github actions locally
+
+uses [act](https://github.com/nektos/act) to test github actions workflows locally. this needs to be installed separately.
+
 ## details
 
 The following were used to build the app, check out the docs:
