@@ -29,6 +29,9 @@ jobs:
       - name: Install packages
         run: yarn install --frozen-lockfile
 
+      - name: Create tmp directory
+        run: mkdir tmp
+
       - name: Generate Charades
         run: yarn generate
         env:
