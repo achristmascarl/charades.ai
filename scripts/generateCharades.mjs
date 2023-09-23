@@ -9,7 +9,13 @@ import { v4 as uuidv4 } from "uuid";
 import { answerList } from "../src/utils.js";
 import { MongoClient } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
-const s3 = new S3({ region: "us-east-2" });
+const s3 = new S3({
+  region: "us-east-2",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
 import { Configuration, OpenAIApi } from "openai";
 const configuration = new Configuration({

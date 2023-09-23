@@ -1,6 +1,6 @@
 import { answerList, wordList } from "./utils";
 import { MongoClient, Db, Collection } from "mongodb";
-import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
+import { ListObjectsV2Command, S3, S3ClientConfig } from "@aws-sdk/client-s3";
 import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
 import Charade from "./models/Charade";
 import dotenv from "dotenv";
@@ -46,7 +46,13 @@ describe("today's and next 6 rounds of charades valid", () => {
     expect(charades).toBeTruthy();
     expect(charades).not.toBeNull();
     expect(charades).not.toBeUndefined();
-    s3client = new S3Client({ region: "us-east-2" });
+    s3client = new S3({
+      region: "us-east-2",
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    } as S3ClientConfig);
     expect(s3client).toBeTruthy();
     expect(s3client).not.toBeNull();
     expect(s3client).not.toBeUndefined();
