@@ -17,7 +17,8 @@
     "cleanup": "./scripts/cleanup.sh",
     "ts": "tsc --noEmit --incremental",
     "ts:watch": "yarn ts --watch",
-    "act:m1:generate": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_generate.yml"
+    "act:m1:generate": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_generate.yml",
+    "act:m1:test": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_next_tests.yml"
   },
   "dependencies": {
     "daisyui": "^3.5.1",
