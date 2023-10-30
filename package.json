@@ -8,16 +8,17 @@
     "start": "next start",
     "rr:dev": "railway run next dev",
     "lint": "next lint",
-    "test": "railway run jest --passWithNoTests",
+    "test": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 yarn jest --passWithNoTests",
     "test:watch": "railway run jest --watch",
     "test:coverage": "railway run jest --coverage",
     "analyze": "railway run cross-env ANALYZE=true next build",
-    "generate": "tsc src/utils.ts && railway run node scripts/generateCharades.mjs",
+    "generate": "tsc src/utils.ts && railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 node scripts/generateCharades.mjs",
     "openai:play": "railway run node scripts/testOpenAI.mjs",
     "cleanup": "./scripts/cleanup.sh",
     "ts": "tsc --noEmit --incremental",
     "ts:watch": "yarn ts --watch",
-    "act:m1:generate": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_generate.yml"
+    "act:m1:generate": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_generate.yml",
+    "act:m1:test": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_next_tests.yml"
   },
   "dependencies": {
     "daisyui": "^3.5.1",
