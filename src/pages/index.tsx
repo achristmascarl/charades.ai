@@ -621,6 +621,7 @@ export default function Home({
                   height: "auto",
                   borderRadius: guesses.length < 1 ? "0" : "1rem",
                 }}
+                priority={true}
               />
             </div>
             <div
@@ -646,6 +647,7 @@ export default function Home({
                 height="200"
                 sizes="100vw"
                 style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
+                priority={true}
               />
             </div>
             <div
@@ -671,6 +673,7 @@ export default function Home({
                 height="200"
                 sizes="100vw"
                 style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
+                priority={guesses.length > 0}
               />
             </div>
             <div
@@ -696,6 +699,7 @@ export default function Home({
                 height="200"
                 sizes="100vw"
                 style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
+                priority={guesses.length > 1}
               />
             </div>
             <div
@@ -721,6 +725,7 @@ export default function Home({
                 height="200"
                 sizes="100vw"
                 style={{ width: "100%", height: "auto", borderRadius: "1rem" }}
+                priority={guesses.length > 2}
               />
             </div>
           </div>
@@ -777,7 +782,7 @@ export default function Home({
               disabled={gameFinished || processingGuess}
               autoCapitalize={"none"}
               autoComplete={"off"}
-              autoCorrect={"false"}
+              autoCorrect={"off"}
               spellCheck={"false"}
             />
             <button
