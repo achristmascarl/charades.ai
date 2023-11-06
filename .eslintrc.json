@@ -1,8 +1,5 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "eslint:recommended"
-  ],
+  "extends": ["next/core-web-vitals", "eslint:recommended"],
   "rules": {
     "quotes": ["error", "double", { "avoidEscape": true }],
     "indent": ["error", 2],
@@ -10,7 +7,8 @@
     "prettier/prettier": [
       "error",
       { "endOfLine": "auto" },
-      { "usePrettierrc": true }
+      { "usePrettierrc": true },
+      { "trailingComma": "es5" }
     ]
   },
   "env": {
@@ -18,9 +16,5 @@
     "node": true,
     "es6": true
   },
-  "plugins": [
-    "react",
-    "react-hooks",
-    "prettier"
-  ]
+  "plugins": ["react", "react-hooks", "prettier"]
 }
