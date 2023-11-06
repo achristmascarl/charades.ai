@@ -6,7 +6,7 @@ dotenv.config();
 import https from "https";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
-import { answerList } from "../src/utils.js";
+import { answerList, sleep } from "../src/utils.js";
 import { MongoClient } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
 const s3 = new S3({
@@ -63,6 +63,7 @@ for (let i = 0; i < generationInfo.length; i++) {
   console.log(prompt);
   let response;
   try {
+    await sleep(60000);
     response = await openai.createImage({
       prompt: prompt,
       n: 5,
