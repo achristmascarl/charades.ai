@@ -30,7 +30,7 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "18.2.0",
     "realm": "^11.10.2",
-    "sharp": "^0.31.1",
+    "sharp": "^0.32.6",
     "typescript": "^5.2.2",
     "uuid": "^9.0.0"
   },
