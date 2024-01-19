@@ -2,15 +2,16 @@ import dotenv from "dotenv";
 dotenv.config();
 import https from "https";
 import fs from "fs";
-import { v4 as uuidv4 } from "uuid";
 import { answerList, sleep } from "../src/utils.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
 import { Configuration, OpenAIApi } from "openai";
 import { parse } from "ts-command-line-args";
+import sharp from "sharp";
 
 interface Args {
   localPreview?: boolean;
+  justOne?: boolean;
 }
 
 const args = parse<Args>({
@@ -18,9 +19,17 @@ const args = parse<Args>({
     type: Boolean,
     optional: true,
   },
+  justOne: {
+    type: Boolean,
+    optional: true,
+  },
 });
 
+const imageWidth = 256;
+const imageHeight = 256;
+
 (async () => {
+  console.log("Generating new rounds of charades...");
   try {
     const s3 = new S3({
       region: "us-east-2",
@@ -67,7 +76,9 @@ const args = parse<Args>({
 
     console.log(process.cwd());
     for (let i = 0; i < generationInfo.length; i++) {
-      const id = uuidv4();
+      const objectId = new ObjectId();
+      const id = objectId.toString();
+      console.log(objectId);
       console.log(id);
       const promptIndex = Math.floor(Math.random() * answerList.length);
       const prompt = answerList[promptIndex];
@@ -76,7 +87,7 @@ const args = parse<Args>({
       response = await openai.createImage({
         prompt: prompt,
         n: 5,
-        size: "256x256",
+        size: `${imageWidth}x${imageHeight}`,
       });
       let uploadPromises = [];
       for (let j = 0; j < 5; j++) {
@@ -95,18 +106,17 @@ const args = parse<Args>({
 
               file.on("close", async () => {
                 console.log(`File ${j + 1} written for prompt ${i}!`);
-                if (args.localPreview) return resolve(true);
                 const blob = fs.readFileSync(
                   `tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`
                 );
                 file.close();
                 console.log(blob);
+                if (args.localPreview) resolve(true);
                 const params = {
                   Bucket: "charades.ai",
                   Key: `images/${id}${j === 0 ? "" : `-${j}`}.jpg`,
                   Body: blob,
                 };
-
                 let s3response = await s3.putObject(params);
                 resolve(s3response);
               });
@@ -117,21 +127,55 @@ const args = parse<Args>({
           })
         );
       }
-      !args.localPreview &&
-        (await Promise.all(uploadPromises).then(async () => {
-          await charades.insertOne({
-            _id: new ObjectId(id),
-            isoDate: new Date(generationInfo[i].isoDateString),
-            isoDateId: generationInfo[i].isoDateId,
-            charadeIndex: generationInfo[i].charadeIndex,
-            answer: prompt,
-          });
-          console.log(`db entry created for prompt ${i}!`);
-        }));
+      await Promise.all(uploadPromises);
+      const mask = Buffer.from(
+        `<svg><rect x="0" y="0" width="${imageWidth}" height="${imageHeight}" rx="10" ry="10" /></svg>`
+      );
+      const modifiedFirstImage = await sharp(`tmp/${id}.jpg`)
+        .resize(imageHeight, imageWidth, { fit: "cover" })
+        .png()
+        .composite([
+          {
+            input: mask,
+            blend: "dest-in",
+          },
+        ])
+        .toBuffer();
+      await sharp("public/charades-dynamic-preview.jpg")
+        .composite([{ input: modifiedFirstImage, left: 32, top: 30 }])
+        .toFile(`tmp/${generationInfo[i].charadeIndex}-preview.jpg`);
+      if (!args.localPreview) {
+        const blob = fs.readFileSync(
+          `tmp/${generationInfo[i].charadeIndex}-preview.jpg`
+        );
+        const params = {
+          Bucket: "charades.ai",
+          Key: `previews/${generationInfo[i].charadeIndex}-preview.jpg`,
+          Body: blob,
+        };
+        await s3.putObject(params);
+      }
+      console.log(`preview image created for prompt ${i}!`);
+      if (!args.localPreview) {
+        console.log("creating db entry...");
+        await charades.insertOne({
+          id,
+          isoDate: new Date(generationInfo[i].isoDateString),
+          isoDateId: generationInfo[i].isoDateId,
+          charadeIndex: generationInfo[i].charadeIndex,
+          answer: prompt,
+        });
+        console.log(`db entry created for prompt ${i}!`);
+      }
+      if (args.justOne) break;
       // avoid rate limiting by openai
       await sleep(60000);
     }
-    console.log(`finished generating ${generationInfo.length} charades`);
+    console.log(
+      `finished generating ${
+        args.justOne ? "1" : generationInfo.length
+      } charade(s)`
+    );
   } catch (err) {
     console.error(JSON.stringify(err as any));
     process.exit(1);
