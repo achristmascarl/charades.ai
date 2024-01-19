@@ -12,7 +12,7 @@
     "test:watch": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 jest --watch",
     "test:coverage": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 jest --coverage",
     "analyze": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 cross-env ANALYZE=true next build",
-    "generate": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 npx ts-node scripts/generateCharades.ts",
+    "generate": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 npx tsx scripts/generateCharades.ts",
     "openai:play": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 node scripts/testOpenAI.mjs",
     "cleanup": "./scripts/cleanup.sh",
     "ts": "tsc --noEmit --incremental",
@@ -31,7 +31,8 @@
     "react-dom": "18.2.0",
     "realm": "^11.10.2",
     "sharp": "^0.33.2",
-    "ts-node": "^10.9.2",
+    "ts-command-line-args": "^2.5.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.2",
     "uuid": "^9.0.0"
   },
