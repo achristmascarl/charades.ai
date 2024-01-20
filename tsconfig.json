@@ -19,7 +19,8 @@
     "module": "esnext",
     "moduleResolution": "node",
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["jest"]
   },
   "include": [
     "next-env.d.ts",
