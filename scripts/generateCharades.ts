@@ -129,10 +129,12 @@ const imageHeight = 256;
       }
       await Promise.all(uploadPromises);
       const mask = Buffer.from(
-        `<svg><rect x="0" y="0" width="${imageWidth}" height="${imageHeight}" rx="10" ry="10" /></svg>`
+        `<svg><rect x="0" y="0" width="${imageWidth * 2}" height="${
+          imageHeight * 2
+        }" rx="20" ry="20" /></svg>`
       );
       const modifiedFirstImage = await sharp(`tmp/${id}.jpg`)
-        .resize(imageHeight, imageWidth, { fit: "cover" })
+        .resize(imageHeight * 2, imageWidth * 2, { fit: "cover" })
         .png()
         .composite([
           {
@@ -142,7 +144,7 @@ const imageHeight = 256;
         ])
         .toBuffer();
       await sharp("public/charades-dynamic-preview.jpg")
-        .composite([{ input: modifiedFirstImage, left: 32, top: 30 }])
+        .composite([{ input: modifiedFirstImage, left: 64, top: 60 }])
         .toFile(`tmp/${generationInfo[i].charadeIndex}-preview.jpg`);
       if (!args.localPreview) {
         const blob = fs.readFileSync(

@@ -14,10 +14,15 @@ import fs from "fs";
 
 interface Args {
   dryRun?: boolean;
+  overwrite?: boolean;
 }
 
 const args = parse<Args>({
   dryRun: {
+    type: Boolean,
+    optional: true,
+  },
+  overwrite: {
     type: Boolean,
     optional: true,
   },
@@ -56,16 +61,18 @@ const imageHeight = 256;
   const client = await MongoClient.connect(process.env.MONGO_URL ?? "");
   const database = client.db("production");
   const charades = database.collection("charades");
-  const result = await charades.find().sort({ isoDate: -1 }).limit(3);
-  console.log(result);
+  const results = await charades.find();
   let charadeDocs: any[] = [];
-  await result.forEach((result) => {
-    charadeDocs.push(result);
+  await results.forEach((results) => {
+    charadeDocs.push(results);
   });
   console.log(`Found ${charadeDocs.length} charades in database`);
   let backfilledCount = 0;
   for (const doc of charadeDocs) {
-    if (!s3objects.includes(`previews/${doc.charadeIndex}-preview.jpg`)) {
+    if (
+      args.overwrite ||
+      !s3objects.includes(`previews/${doc.charadeIndex}-preview.jpg`)
+    ) {
       console.log(`Missing preview for ${doc.charadeIndex}. Generating...`);
       if (!args.dryRun) {
         const firstImage = await s3client.send(
@@ -80,15 +87,17 @@ const imageHeight = 256;
         }
         const bytes = await firstImage.Body?.transformToByteArray();
         const mask = Buffer.from(
-          `<svg><rect x="0" y="0" width="${imageWidth}" height="${imageHeight}" rx="10" ry="10" /></svg>`
+          `<svg><rect x="0" y="0" width="${imageWidth * 2}" height="${
+            imageHeight * 2
+          }" rx="20" ry="20" /></svg>`
         );
         const modifiedFirstImage = await sharp(Buffer.from(bytes))
-          .resize(imageWidth, imageHeight, { fit: "cover" })
+          .resize(imageWidth * 2, imageHeight * 2, { fit: "cover" })
           .png()
           .composite([{ input: mask, blend: "dest-in" }])
           .toBuffer();
         await sharp("public/charades-dynamic-preview.jpg")
-          .composite([{ input: modifiedFirstImage, left: 32, top: 30 }])
+          .composite([{ input: modifiedFirstImage, left: 64, top: 60 }])
           .toFile(`tmp/${doc.charadeIndex}-preview.jpg`);
         const blob = fs.readFileSync(`tmp/${doc.charadeIndex}-preview.jpg`);
         await s3client.send(
