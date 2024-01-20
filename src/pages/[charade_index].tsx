@@ -42,6 +42,13 @@ export default function CharadeIndex({ index }: { index: string }) {
             `charades.ai/previews/${index}-preview.jpg`
           }
         />
+        <meta
+          property="twitter:image"
+          content={
+            "https://s3.us-east-2.amazonaws.com/" +
+            `charades.ai/previews/${index}-preview.jpg`
+          }
+        />
       </Head>
       <div className="flex flex-col align-middle justify-center h-screen">
         <p className="text-center">Redirecting to today&apos;s round...</p>
