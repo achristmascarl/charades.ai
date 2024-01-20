@@ -61,11 +61,10 @@ const imageHeight = 256;
   const client = await MongoClient.connect(process.env.MONGO_URL ?? "");
   const database = client.db("production");
   const charades = database.collection("charades");
-  const result = await charades.find().sort({ isoDate: -1 }).limit(3);
-  console.log(result);
+  const results = await charades.find();
   let charadeDocs: any[] = [];
-  await result.forEach((result) => {
-    charadeDocs.push(result);
+  await results.forEach((results) => {
+    charadeDocs.push(results);
   });
   console.log(`Found ${charadeDocs.length} charades in database`);
   let backfilledCount = 0;
