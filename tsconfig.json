@@ -20,13 +20,11 @@
     "moduleResolution": "node",
     "isolatedModules": true,
     "jsx": "preserve",
-    "types": ["jest"]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "src/**/*.ts",
   ],
   "exclude": [
     "node_modules"
