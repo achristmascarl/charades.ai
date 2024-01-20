@@ -71,12 +71,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
   console.log(query);
   const charade = await charades.findOne(query);
   console.log(charade);
-  if (!charade) {
-    throw new Error("No charade found for today");
-  }
   await client.close();
-  console.log(charade);
-  const mostRecentIndex = parseInt(charade.charadeIndex);
+  const mostRecentIndex = parseInt(charade?.charadeIndex ?? "0");
   const paths = [];
   for (let i = 0; i <= mostRecentIndex; i++) {
     paths.push({ params: { charade_index: i.toString() } });
