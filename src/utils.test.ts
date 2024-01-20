@@ -96,7 +96,7 @@ describe("today's and next 6 rounds of charades valid", () => {
         document?.charadeIndex,
         document?.answer,
         document?.isoDate,
-        document?.isoDateId,
+        document?.isoDateId
       );
       const charadeId = document?._id.toString();
       expect(charadeId).toBeTruthy();
@@ -109,9 +109,12 @@ describe("today's and next 6 rounds of charades valid", () => {
       expect(charade.answer).not.toBeNull();
       expect(charade.answer).toHaveLength(5);
       expect(s3objects).toContain(`images/${charadeId}.jpg`);
+      expect(s3objects).toContain(
+        `previews/${charade.charadeIndex}-preview.jpg`
+      );
       for (let i = 1; i < 5; i++) {
         expect(s3objects).toContain(`images/${charadeId}-${i}.jpg`);
       }
-    }),
+    })
   );
 });

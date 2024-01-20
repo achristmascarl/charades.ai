@@ -6,7 +6,8 @@
     "prettier/prettier": [
       "error",
       { "endOfLine": "auto" },
-      { "usePrettierrc": true }
+      { "usePrettierrc": true },
+      { "trailingComma": "all" }
     ]
   },
   "env": {
