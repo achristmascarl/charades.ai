@@ -56,12 +56,14 @@ const imageHeight = 256;
   const client = await MongoClient.connect(process.env.MONGO_URL ?? "");
   const database = client.db("production");
   const charades = database.collection("charades");
-  const results = await charades.find();
+  const result = await charades.find().sort({ isoDate: -1 }).limit(3);
+  console.log(result);
   let charadeDocs: any[] = [];
-  await results.forEach((result) => {
+  await result.forEach((result) => {
     charadeDocs.push(result);
   });
   console.log(`Found ${charadeDocs.length} charades in database`);
+  let backfilledCount = 0;
   for (const doc of charadeDocs) {
     if (!s3objects.includes(`previews/${doc.charadeIndex}-preview.jpg`)) {
       console.log(`Missing preview for ${doc.charadeIndex}. Generating...`);
@@ -97,8 +99,10 @@ const imageHeight = 256;
           })
         );
         console.log(`Uploaded preview for ${doc.charadeIndex}`);
+        backfilledCount++;
       }
     }
   }
-  console.log(charadeDocs);
+  console.log(`Backfilled ${backfilledCount} previews. Finished!`);
+  process.exit(0);
 })();
