@@ -108,3 +108,4 @@ tmp/
 
 src/utils.js
 public/*-preview.jpg
+yarn.lock
