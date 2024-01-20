@@ -83,7 +83,7 @@ const imageHeight = 256;
       const promptIndex = Math.floor(Math.random() * answerList.length);
       const prompt = answerList[promptIndex];
       console.log(prompt);
-      let response;
+      let response: any;
       response = await openai.createImage({
         prompt: prompt,
         n: 5,
