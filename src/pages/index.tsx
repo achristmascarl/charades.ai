@@ -120,7 +120,7 @@ export default function Home({
     for (let i = 0; i < guesses.length; i++) {
       shareString += `${guesses[i].guessEmojis} \n`;
     }
-    shareString += `https://charades.ai/${charadeIndex}`;
+    shareString += `https://charades.ai`;
     return shareString;
   }, [charadeIndex, guesses, gameWon]);
 
@@ -382,7 +382,13 @@ export default function Home({
           name="description"
           content="play charades with ai! powered by openai's dall·e."
         />
-        <meta property="og:image" content="/charades-preview-image.jpg" />
+        <meta
+          property="og:image"
+          content={
+            "https://s3.us-east-2.amazonaws.com/" +
+            `charades.ai/previews/${charadeIndex}-preview.jpg`
+          }
+        />
       </Head>
       <div
         id="main"
