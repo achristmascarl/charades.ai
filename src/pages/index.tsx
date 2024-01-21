@@ -1,9 +1,15 @@
+import dotenv from "dotenv";
 import { useState, useEffect, useCallback, useMemo, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
+import {
+  S3,
+  S3ClientConfig,
+  GetObjectCommand,
+} from "@aws-sdk/client-s3";
+import sharp from "sharp";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-
 import Guess from "../models/Guess";
 import {
   track,
@@ -21,9 +27,11 @@ import { placeholderSquareTinyBase64 } from "../../public/blurImages";
 import styles from "../styles/Home.module.css";
 
 export async function getStaticProps() {
+  dotenv.config();
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
+  let previewImagePath = "/charades-preview-image.jpg";
   let client;
 
   let url = process.env.MONGO_URL;
@@ -66,11 +74,39 @@ export async function getStaticProps() {
     await client?.close();
   }
 
+  // download dynamic preview image from s3
+  const s3client = new S3({
+    region: "us-east-2",
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    },
+  } as S3ClientConfig);
+  try {
+    const dynamicPreviewImage = await s3client.send(
+      new GetObjectCommand({
+        Bucket: "charades.ai",
+        Key: `previews/${charadeIndex}-preview.jpg`,
+      }),
+    );
+    if (!dynamicPreviewImage.Body) {
+      throw new Error(`no preview found for charade ${charadeIndex}, id: ${charadeId}`);
+    }
+    const bytes = await dynamicPreviewImage.Body?.transformToByteArray();
+    console.log(process.cwd());
+    await sharp(Buffer.from(bytes))
+      .toFile(`public/${charadeIndex}-preview.jpg`);
+    previewImagePath = `/${charadeIndex}-preview.jpg`;
+  } catch (err) {
+    console.error(err);
+  }
+
   return {
     props: {
       charadeIndex,
       answerString,
       charadeId,
+      previewImagePath,
     },
     revalidate: 60,
   };
@@ -87,12 +123,14 @@ interface HomeProps {
   charadeIndex: string;
   answerString: string;
   charadeId: string;
+  previewImagePath: string;
 }
 
 export default function Home({
   charadeIndex,
   answerString,
   charadeId,
+  previewImagePath,
 }: HomeProps) {
   const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
@@ -384,10 +422,11 @@ export default function Home({
         />
         <meta
           property="og:image"
-          content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${charadeIndex}-preview.jpg`
-          }
+          content={previewImagePath?.length ? previewImagePath : "/charades-preview-image.jpg"}
+        />
+        <meta
+          property="twitter:image"
+          content={previewImagePath?.length ? previewImagePath : "/charades-preview-image.jpg"}
         />
       </Head>
       <div
