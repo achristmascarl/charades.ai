@@ -36,12 +36,20 @@ export default function CharadeIndex({ index }: { index: string }) {
           content="play charades with ai! powered by openai's dall·e."
         />
         <meta
+          name="og:description"
+          content="play charades with ai! powered by openai's dall·e."
+        />
+        <meta
           property="og:image"
           content={
             "https://s3.us-east-2.amazonaws.com/" +
             `charades.ai/previews/${index}-preview.jpg`
           }
         />
+        <meta property="og:image:type" content="image/jpg"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="twitter:card" content="summary_large_image"/>
         <meta
           property="twitter:image"
           content={

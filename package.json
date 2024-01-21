@@ -4,9 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 next dev && yarn ts:watch",
-    "build": "next build",
-    "start": "next start",
-    "rr:dev": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 next dev",
+    "build": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 next build",
+    "start": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 next start",
     "lint": "next lint",
     "test": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 yarn node --experimental-vm-modules $(yarn bin jest) --passWithNoTests",
     "test:watch": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 yarn node --experimental-vm-modules $(yarn bin jest) --watch",
