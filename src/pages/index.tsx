@@ -8,7 +8,6 @@ import {
   S3ClientConfig,
   GetObjectCommand,
 } from "@aws-sdk/client-s3";
-import sharp from "sharp";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Guess from "../models/Guess";
 import {
@@ -31,7 +30,6 @@ export async function getStaticProps() {
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
-  let previewImagePath = "/charades-preview-image.jpg";
   let client;
 
   let url = process.env.MONGO_URL;
@@ -74,39 +72,11 @@ export async function getStaticProps() {
     await client?.close();
   }
 
-  // download dynamic preview image from s3
-  const s3client = new S3({
-    region: "us-east-2",
-    credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    },
-  } as S3ClientConfig);
-  try {
-    const dynamicPreviewImage = await s3client.send(
-      new GetObjectCommand({
-        Bucket: "charades.ai",
-        Key: `previews/${charadeIndex}-preview.jpg`,
-      }),
-    );
-    if (!dynamicPreviewImage.Body) {
-      throw new Error(`no preview found for charade ${charadeIndex}, id: ${charadeId}`);
-    }
-    const bytes = await dynamicPreviewImage.Body?.transformToByteArray();
-    console.log(process.cwd());
-    await sharp(Buffer.from(bytes))
-      .toFile(`public/${charadeIndex}-preview.jpg`);
-    previewImagePath = `/${charadeIndex}-preview.jpg`;
-  } catch (err) {
-    console.error(err);
-  }
-
   return {
     props: {
       charadeIndex,
       answerString,
       charadeId,
-      previewImagePath,
     },
     revalidate: 60,
   };
@@ -123,14 +93,12 @@ interface HomeProps {
   charadeIndex: string;
   answerString: string;
   charadeId: string;
-  previewImagePath: string;
 }
 
 export default function Home({
   charadeIndex,
   answerString,
   charadeId,
-  previewImagePath,
 }: HomeProps) {
   const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
@@ -421,12 +389,26 @@ export default function Home({
           content="play charades with ai! powered by openai's dall·e."
         />
         <meta
-          property="og:image"
-          content={previewImagePath?.length ? previewImagePath : "/charades-preview-image.jpg"}
+          name="og:description"
+          content="play charades with ai! powered by openai's dall·e."
         />
         <meta
+          property="og:image"
+          content={
+            "https://s3.us-east-2.amazonaws.com/" +
+            `charades.ai/previews/${charadeIndex}-preview.jpg`
+          }
+        />
+        <meta property="og:image:type" content="image/jpg"/>
+        <meta property="og:image:width" content="1200"/>
+        <meta property="og:image:height" content="630"/>
+        <meta property="twitter:card" content="summary_large_image"/>
+        <meta
           property="twitter:image"
-          content={previewImagePath?.length ? previewImagePath : "/charades-preview-image.jpg"}
+          content={
+            "https://s3.us-east-2.amazonaws.com/" +
+            `charades.ai/previews/${charadeIndex}-preview.jpg`
+          }
         />
       </Head>
       <div
