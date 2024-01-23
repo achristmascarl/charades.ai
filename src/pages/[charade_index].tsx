@@ -76,18 +76,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const database = client.db("production");
   const charades = database.collection("charades");
 
-  // get charade for today
-  const date = new Date(Date.now());
-  date.setUTCHours(date.getUTCHours() - 4);
-  const isoString = date.toISOString();
-  const isoDateId = isoString.split("T")[0];
-  console.log(isoDateId);
-  const query = { isoDateId: isoDateId };
-  console.log(query);
-  const charade = await charades.findOne(query);
-  console.log(charade);
+  // get most recent charade
+  const results = await charades.find().sort({ isoDate: -1 }).limit(1).toArray();
+  let index;
+  results.forEach((result) => {
+    console.log(result.charadeIndex)
+    index = result.charadeIndex;
+  });
+  console.log(index);
   await client.close();
-  const mostRecentIndex = parseInt(charade?.charadeIndex ?? "0");
+  const mostRecentIndex = parseInt(index ?? "0");
   const paths = [];
   for (let i = 0; i <= mostRecentIndex; i++) {
     paths.push({ params: { charade_index: i.toString() } });
