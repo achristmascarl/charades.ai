@@ -42,8 +42,8 @@ export default function CharadeIndex({ index }: { index: string }) {
         <meta
           property="og:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${index}-preview.jpg`
+            "https://images.charades.ai/" +
+            `previews/${index}-preview.jpg`
           }
         />
         <meta property="og:image:type" content="image/jpg"/>
@@ -53,8 +53,8 @@ export default function CharadeIndex({ index }: { index: string }) {
         <meta
           property="twitter:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${index}-preview.jpg`
+            "https://images.charades.ai/" +
+            `previews/${index}-preview.jpg`
           }
         />
       </Head>

@@ -10,7 +10,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ["s3.us-east-2.amazonaws.com"],
+    domains: ["s3.us-east-2.amazonaws.com", "images.charades.ai"],
     unoptimized: true,
   },
 };

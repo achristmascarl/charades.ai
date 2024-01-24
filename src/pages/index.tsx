@@ -3,11 +3,6 @@ import { useState, useEffect, useCallback, useMemo, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
-import {
-  S3,
-  S3ClientConfig,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Guess from "../models/Guess";
 import {
@@ -395,8 +390,8 @@ export default function Home({
         <meta
           property="og:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${charadeIndex}-preview.jpg`
+            "https://images.charades.ai/" +
+            `previews/${charadeIndex}-preview.jpg`
           }
         />
         <meta property="og:image:type" content="image/jpg"/>
@@ -406,8 +401,8 @@ export default function Home({
         <meta
           property="twitter:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${charadeIndex}-preview.jpg`
+            "https://images.charades.ai/" +
+            `previews/${charadeIndex}-preview.jpg`
           }
         />
       </Head>
@@ -634,8 +629,8 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://s3.us-east-2.amazonaws.com/" +
-                  `charades.ai/images/${charadeId}.jpg`
+                  "https://images.charades.ai/" +
+                  `images/${charadeId}.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -664,8 +659,8 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://s3.us-east-2.amazonaws.com/" +
-                  `charades.ai/images/${charadeId}-1.jpg`
+                  "https://images.charades.ai/" +
+                  `images/${charadeId}-1.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -690,8 +685,8 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://s3.us-east-2.amazonaws.com/" +
-                  `charades.ai/images/${charadeId}-2.jpg`
+                  "https://images.charades.ai/" +
+                  `images/${charadeId}-2.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -716,8 +711,8 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://s3.us-east-2.amazonaws.com/" +
-                  `charades.ai/images/${charadeId}-3.jpg`
+                  "https://images.charades.ai/" +
+                  `images/${charadeId}-3.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -742,8 +737,8 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://s3.us-east-2.amazonaws.com/" +
-                  `charades.ai/images/${charadeId}-4.jpg`
+                  "https://images.charades.ai/" +
+                  `images/${charadeId}-4.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
