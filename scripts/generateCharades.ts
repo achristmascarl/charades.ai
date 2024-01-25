@@ -163,7 +163,7 @@ const imageHeight = 256;
       if (!args.localPreview) {
         console.log("creating db entry...");
         await charades.insertOne({
-          id,
+          _id: objectId,
           isoDate: new Date(generationInfo[i].isoDateString),
           isoDateId: generationInfo[i].isoDateId,
           charadeIndex: generationInfo[i].charadeIndex,
