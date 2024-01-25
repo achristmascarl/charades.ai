@@ -116,6 +116,7 @@ const imageHeight = 256;
                   Bucket: "charades.ai",
                   Key: `images/${id}${j === 0 ? "" : `-${j}`}.jpg`,
                   Body: blob,
+                  ContentType: "image/jpeg",
                 };
                 let s3response = await s3.putObject(params);
                 resolve(s3response);
@@ -154,6 +155,7 @@ const imageHeight = 256;
           Bucket: "charades.ai",
           Key: `previews/${generationInfo[i].charadeIndex}-preview.jpg`,
           Body: blob,
+          ContentType: "image/jpeg",
         };
         await s3.putObject(params);
       }

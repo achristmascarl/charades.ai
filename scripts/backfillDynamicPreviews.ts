@@ -105,6 +105,7 @@ const imageHeight = 256;
             Bucket: "charades.ai",
             Key: `previews/${doc.charadeIndex}-preview.jpg`,
             Body: blob,
+            ContentType: "image/jpeg",
           })
         );
         console.log(`Uploaded preview for ${doc.charadeIndex}`);
