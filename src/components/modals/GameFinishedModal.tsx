@@ -74,7 +74,10 @@ export default function GameFinishedModal({
             Share Results
           </button>
         </CopyToClipboard>
-        <button className="btn mx-auto my-3 h-auto py-1" onClick={comingSoonAction}>
+        <button
+          className="btn mx-auto my-3 h-auto py-1"
+          onClick={comingSoonAction}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"

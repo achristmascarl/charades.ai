@@ -98,7 +98,7 @@ const imageHeight = 256;
               if (!imageUrl) throw new Error("no image url");
               console.log(imageUrl);
               const file = fs.createWriteStream(
-                `tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`
+                `tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`,
               );
               https.get(imageUrl, function (response) {
                 response.pipe(file);
@@ -107,7 +107,7 @@ const imageHeight = 256;
               file.on("close", async () => {
                 console.log(`File ${j + 1} written for prompt ${i}!`);
                 const blob = fs.readFileSync(
-                  `tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`
+                  `tmp/${id}${j === 0 ? "" : `-${j}`}.jpg`,
                 );
                 file.close();
                 console.log(blob);
@@ -125,14 +125,14 @@ const imageHeight = 256;
               console.log(err);
               throw new Error(JSON.stringify(err as any));
             }
-          })
+          }),
         );
       }
       await Promise.all(uploadPromises);
       const mask = Buffer.from(
         `<svg><rect x="0" y="0" width="${imageWidth * 2}" height="${
           imageHeight * 2
-        }" rx="20" ry="20" /></svg>`
+        }" rx="20" ry="20" /></svg>`,
       );
       const modifiedFirstImage = await sharp(`tmp/${id}.jpg`)
         .resize(imageHeight * 2, imageWidth * 2, { fit: "cover" })
@@ -149,7 +149,7 @@ const imageHeight = 256;
         .toFile(`tmp/${generationInfo[i].charadeIndex}-preview.jpg`);
       if (!args.localPreview) {
         const blob = fs.readFileSync(
-          `tmp/${generationInfo[i].charadeIndex}-preview.jpg`
+          `tmp/${generationInfo[i].charadeIndex}-preview.jpg`,
         );
         const params = {
           Bucket: "charades.ai",
@@ -178,7 +178,7 @@ const imageHeight = 256;
     console.log(
       `finished generating ${
         args.justOne ? "1" : generationInfo.length
-      } charade(s)`
+      } charade(s)`,
     );
   } catch (err) {
     console.error(JSON.stringify(err as any));

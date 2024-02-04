@@ -1,5 +1,11 @@
 import dotenv from "dotenv";
-import { useState, useEffect, useCallback, useMemo, ChangeEvent } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  ChangeEvent,
+} from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
@@ -193,7 +199,8 @@ export default function Home({
       guess.length !== 5 ||
       gameFinished ||
       processingGuess
-    ) return;
+    )
+      return;
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
       setTimeout(() => {
@@ -401,10 +408,10 @@ export default function Home({
             `previews/${charadeIndex}-preview.jpg`
           }
         />
-        <meta property="og:image:type" content="image/jpeg"/>
-        <meta property="og:image:width" content="1200"/>
-        <meta property="og:image:height" content="630"/>
-        <meta property="twitter:card" content="summary_large_image"/>
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:image"
           content={
@@ -597,7 +604,7 @@ export default function Home({
                 className="btn mx-auto my-3 h-auto py-1"
                 onClick={() => {
                   setModalOpenId(modalIDs.ComingSoon);
-                  track("click_play_again", "button_click", "coming_soon");
+                  track("click_unlock_previous", "button_click", "coming_soon");
                 }}
               >
                 <svg
@@ -613,7 +620,8 @@ export default function Home({
                     clipRule="evenodd"
                   />
                 </svg>
-                Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds <div className="badge text-blue-500">$0.50</div>
+                Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds{" "}
+                <div className="badge text-blue-500">$0.50</div>
               </button>
             </>
           )}
@@ -635,10 +643,7 @@ export default function Home({
               }
             >
               <Image
-                src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}.jpg`
-                }
+                src={"https://images.charades.ai/" + `images/${charadeId}.jpg`}
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
                 alt="ai-generated image 1"
@@ -666,8 +671,7 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-1.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-1.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -692,8 +696,7 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-2.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-2.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -718,8 +721,7 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-3.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-3.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -744,8 +746,7 @@ export default function Home({
             >
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-4.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-4.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -911,7 +912,7 @@ export default function Home({
           completionStreak={completionStreak}
           comingSoonAction={() => {
             setModalOpenId(modalIDs.ComingSoon);
-            track("click_play_again", "button_click", "coming_soon");
+            track("click_unlock_previous", "button_click", "coming_soon");
           }}
           copyText={getShareString()}
           handleShareResults={handleShareResults}
