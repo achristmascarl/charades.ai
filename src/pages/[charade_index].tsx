@@ -42,19 +42,17 @@ export default function CharadeIndex({ index }: { index: string }) {
         <meta
           property="og:image"
           content={
-            "https://images.charades.ai/" +
-            `previews/${index}-preview.jpg`
+            "https://images.charades.ai/" + `previews/${index}-preview.jpg`
           }
         />
-        <meta property="og:image:type" content="image/jpg"/>
-        <meta property="og:image:width" content="1200"/>
-        <meta property="og:image:height" content="630"/>
-        <meta property="twitter:card" content="summary_large_image"/>
+        <meta property="og:image:type" content="image/jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:image"
           content={
-            "https://images.charades.ai/" +
-            `previews/${index}-preview.jpg`
+            "https://images.charades.ai/" + `previews/${index}-preview.jpg`
           }
         />
       </Head>
@@ -77,10 +75,14 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const charades = database.collection("charades");
 
   // get most recent charade
-  const results = await charades.find().sort({ isoDate: -1 }).limit(1).toArray();
+  const results = await charades
+    .find()
+    .sort({ isoDate: -1 })
+    .limit(1)
+    .toArray();
   let index;
   results.forEach((result) => {
-    console.log(result.charadeIndex)
+    console.log(result.charadeIndex);
     index = result.charadeIndex;
   });
   console.log(index);

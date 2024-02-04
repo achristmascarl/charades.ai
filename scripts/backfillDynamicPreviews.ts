@@ -85,7 +85,7 @@ const imageHeight = 256;
           new GetObjectCommand({
             Bucket: "charades.ai",
             Key: `images/${doc._id.toString()}.jpg`,
-          })
+          }),
         );
         if (!firstImage.Body) {
           console.log(`No image found for ${doc.charadeIndex}`);
@@ -95,7 +95,7 @@ const imageHeight = 256;
         const mask = Buffer.from(
           `<svg><rect x="0" y="0" width="${imageWidth * 2}" height="${
             imageHeight * 2
-          }" rx="20" ry="20" /></svg>`
+          }" rx="20" ry="20" /></svg>`,
         );
         const modifiedFirstImage = await sharp(Buffer.from(bytes))
           .resize(imageWidth * 2, imageHeight * 2, { fit: "cover" })
@@ -112,7 +112,7 @@ const imageHeight = 256;
             Key: `previews/${doc.charadeIndex}-preview.jpg`,
             Body: blob,
             ContentType: "image/jpeg",
-          })
+          }),
         );
         console.log(`Uploaded preview for ${doc.charadeIndex}`);
         backfilledCount++;
