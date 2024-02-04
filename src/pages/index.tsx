@@ -1,5 +1,11 @@
 import dotenv from "dotenv";
-import { useState, useEffect, useCallback, useMemo, ChangeEvent } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  ChangeEvent,
+} from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
@@ -186,7 +192,15 @@ export default function Home({
     }
   }
 
-  function handleGuess() {
+  function handleGuess(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (
+      guess.length < 1 ||
+      guess.length !== 5 ||
+      gameFinished ||
+      processingGuess
+    )
+      return;
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
       setTimeout(() => {
@@ -394,10 +408,10 @@ export default function Home({
             `previews/${charadeIndex}-preview.jpg`
           }
         />
-        <meta property="og:image:type" content="image/jpeg"/>
-        <meta property="og:image:width" content="1200"/>
-        <meta property="og:image:height" content="630"/>
-        <meta property="twitter:card" content="summary_large_image"/>
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:image"
           content={
@@ -411,8 +425,7 @@ export default function Home({
         className={
           "flex flex-col max-w-xl mx-auto " +
           "min-h-screen overflow-x-hidden content-center sm:p-10 p-3 pt-3"
-        }
-      >
+        }>
         <div className={"toast toast-top toast-center z-50 w-full max-w-lg"}>
           {showCopiedAlert && (
             <div className="alert flex flex-row">
@@ -420,14 +433,15 @@ export default function Home({
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                className="stroke-info w-6 h-6"
-              >
+                className="stroke-info w-6 h-6">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
+                  d={
+                    "M13 16h-1v-4h-1m1-4h.01M21 " +
+                    "12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  }></path>
               </svg>
               <span className="whitespace-normal text-left">
                 Copied results to clipboard.
@@ -440,8 +454,7 @@ export default function Home({
                 xmlns="http://www.w3.org/2000/svg"
                 className="stroke-current shrink-0 h-6 w-6"
                 fill="none"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -461,8 +474,7 @@ export default function Home({
                 xmlns="http://www.w3.org/2000/svg"
                 className="stroke-current shrink-0 h-6 w-6"
                 fill="none"
-                viewBox="0 0 24 24"
-              >
+                viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -495,14 +507,12 @@ export default function Home({
                 onClick={() => {
                   setModalOpenId(modalIDs.Help);
                   track("click_help", "button_click", "help");
-                }}
-              >
+                }}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="currentColor"
-                  className="w-5 h-5"
-                >
+                  className="w-5 h-5">
                   <path
                     fillRule="evenodd"
                     // eslint-disable-next-line max-len
@@ -516,33 +526,28 @@ export default function Home({
           <div
             className={
               "flex flex-row justify-center space-x-5 align-middle mb-1"
-            }
-          >
+            }>
             <div
               className="tooltip tooltip-bottom"
-              data-tip={`${winStreak} day win streak`}
-            >
+              data-tip={`${winStreak} day win streak`}>
               <div
                 style={
                   winStreak < 1
                     ? { opacity: "20%", textShadow: "0 0 0 gray" }
                     : {}
-                }
-              >
+                }>
                 {`🔥 ${winStreak}`}
               </div>
             </div>
             <div
               className="tooltip tooltip-bottom"
-              data-tip={`${completionStreak} day completion streak`}
-            >
+              data-tip={`${completionStreak} day completion streak`}>
               <div
                 style={
                   completionStreak < 1
                     ? { opacity: "20%", textShadow: "0 0 0 gray" }
                     : {}
-                }
-              >
+                }>
                 {`✅ ${completionStreak}`}
               </div>
             </div>
@@ -567,15 +572,13 @@ export default function Home({
             <>
               <CopyToClipboard
                 text={getShareString()}
-                onCopy={handleShareResults}
-              >
+                onCopy={handleShareResults}>
                 <button className="btn mx-2 my-3">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-6 h-6 mr-2"
-                  >
+                    className="w-6 h-6 mr-2">
                     <path
                       fillRule="evenodd"
                       // eslint-disable-next-line max-len
@@ -587,18 +590,16 @@ export default function Home({
                 </button>
               </CopyToClipboard>
               <button
-                className="btn mx-auto my-3"
+                className="btn mx-auto my-3 h-auto py-1"
                 onClick={() => {
                   setModalOpenId(modalIDs.ComingSoon);
-                  track("click_play_again", "button_click", "coming_soon");
-                }}
-              >
+                  track("click_unlock_previous", "button_click", "coming_soon");
+                }}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="currentColor"
-                  className="w-6 h-6"
-                >
+                  className="w-6 h-6">
                   <path
                     fillRule="evenodd"
                     // eslint-disable-next-line max-len
@@ -606,7 +607,8 @@ export default function Home({
                     clipRule="evenodd"
                   />
                 </svg>
-                Bonus Round <div className="badge text-blue-500">$0.50</div>
+                Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds{" "}
+                <div className="badge text-blue-500">$0.50</div>
               </button>
             </>
           )}
@@ -616,8 +618,7 @@ export default function Home({
               `carousel-center shadow-inner w-full space-x-4 bg-gray-100 ${
                 guesses.length < 1 ? "p-0" : "p-3 rounded-box"
               }`
-            }
-          >
+            }>
             <div
               id="pic1"
               className={
@@ -625,13 +626,9 @@ export default function Home({
                 `carousel-item scroll-mt-2 ${
                   guesses.length > 0 || gameWon ? "w-4/5 rounded-box" : "w-full"
                 } ${styles.carouselItem}`
-              }
-            >
+              }>
               <Image
-                src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}.jpg`
-                }
+                src={"https://images.charades.ai/" + `images/${charadeId}.jpg`}
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
                 alt="ai-generated image 1"
@@ -655,12 +652,10 @@ export default function Home({
                     ? "block opacity-100"
                     : "hidden opacity-0"
                 }`
-              }
-            >
+              }>
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-1.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-1.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -681,12 +676,10 @@ export default function Home({
                     ? "block opacity-100"
                     : "hidden opacity-0"
                 }`
-              }
-            >
+              }>
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-2.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-2.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -707,12 +700,10 @@ export default function Home({
                     ? "block opacity-100"
                     : "hidden opacity-0"
                 }`
-              }
-            >
+              }>
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-3.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-3.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -733,12 +724,10 @@ export default function Home({
                     ? "block opacity-100"
                     : "hidden opacity-0"
                 }`
-              }
-            >
+              }>
               <Image
                 src={
-                  "https://images.charades.ai/" +
-                  `images/${charadeId}-4.jpg`
+                  "https://images.charades.ai/" + `images/${charadeId}-4.jpg`
                 }
                 placeholder="blur"
                 blurDataURL={placeholderSquareTinyBase64}
@@ -784,72 +773,70 @@ export default function Home({
               href={"https://openai.com/blog/dall-e/"}
               target="_blank"
               rel="noreferrer"
-              className="text-blue-500 hover:underline"
-            >
+              className="text-blue-500 hover:underline">
               DALL·E
             </a>
           </p>
         </div>
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
-          <div className="flex flex-row content-center justify-between">
-            <input
-              type="text"
-              placeholder="Type guess here"
-              className={
-                "input input-bordered w-full font-mono tracking-[.45rem]"
-              }
-              onChange={(e) => processInput(e)}
-              value={guess}
-              maxLength={5}
-              disabled={gameFinished || processingGuess}
-              autoCapitalize={"none"}
-              autoComplete={"off"}
-              autoCorrect={"off"}
-              spellCheck={"false"}
-            />
+          <form onSubmit={handleGuess}>
+            <div className="flex flex-row content-center justify-between">
+              <input
+                type="text"
+                placeholder="Type guess here"
+                className={
+                  "input input-bordered w-full font-mono tracking-[.45rem]"
+                }
+                onChange={(e) => processInput(e)}
+                value={guess}
+                maxLength={5}
+                disabled={gameFinished || processingGuess}
+                autoCapitalize={"none"}
+                autoComplete={"off"}
+                autoCorrect={"off"}
+                spellCheck={"false"}
+              />
+              <button
+                className="btn ml-3 sm:block hidden"
+                disabled={
+                  guess.length < 1 ||
+                  guess.length !== 5 ||
+                  gameFinished ||
+                  processingGuess
+                }
+                type="submit">
+                👈 Guess
+              </button>
+            </div>
+            {guess && guess.length > 0 && (
+              <p className="ml-4 mt-1 text-left">
+                <span className={isIos ? "text-xs" : "text-base"}>
+                  {feedbackEmojis}
+                </span>
+                (
+                <span
+                  className="hover:underline text-blue-500 cursor-pointer"
+                  onClick={() => {
+                    setModalOpenId(modalIDs.Help);
+                    track("click_whats_this", "button_click", "help");
+                  }}>
+                  What&apos;s this?
+                </span>
+                )
+              </p>
+            )}
             <button
-              className="btn ml-3 sm:block hidden"
+              className="btn mx-auto mt-1 sm:hidden"
               disabled={
                 guess.length < 1 ||
                 guess.length !== 5 ||
                 gameFinished ||
                 processingGuess
               }
-              onClick={handleGuess}
-            >
-              👈 Guess
+              type="submit">
+              👆 Guess
             </button>
-          </div>
-          {guess && guess.length > 0 && (
-            <p className="ml-4 mt-1 text-left">
-              <span className={isIos ? "text-xs" : "text-base"}>
-                {feedbackEmojis}
-              </span>
-              (
-              <span
-                className="hover:underline text-blue-500 cursor-pointer"
-                onClick={() => {
-                  setModalOpenId(modalIDs.Help);
-                  track("click_whats_this", "button_click", "help");
-                }}
-              >
-                What&apos;s this?
-              </span>
-              )
-            </p>
-          )}
-          <button
-            className="btn mx-auto mt-1 sm:hidden"
-            disabled={
-              guess.length < 1 ||
-              guess.length !== 5 ||
-              gameFinished ||
-              processingGuess
-            }
-            onClick={handleGuess}
-          >
-            👆 Guess
-          </button>
+          </form>
         </div>
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">
@@ -876,8 +863,7 @@ export default function Home({
             href={`https://www.birbstreet.com/?${referralParams}`}
             target="_blank"
             rel="noreferrer"
-            className="text-blue-500"
-          >
+            className="text-blue-500">
             Birb Street
           </a>
           .
@@ -902,7 +888,7 @@ export default function Home({
           completionStreak={completionStreak}
           comingSoonAction={() => {
             setModalOpenId(modalIDs.ComingSoon);
-            track("click_play_again", "button_click", "coming_soon");
+            track("click_unlock_previous", "button_click", "coming_soon");
           }}
           copyText={getShareString()}
           handleShareResults={handleShareResults}

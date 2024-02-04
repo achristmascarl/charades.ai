@@ -41,8 +41,7 @@ export default function GameFinishedModal({
       </p>
       <p className="py-2">tune in tomorrow to keep your streak alive:</p>
       <div
-        className={"flex flex-row justify-start space-x-5 align-middle mb-1"}
-      >
+        className={"flex flex-row justify-start space-x-5 align-middle mb-1"}>
         <div>{`🔥 ${winStreak} day win streak`}</div>
         <div>{`✅ ${completionStreak} day completion streak`}</div>
       </div>
@@ -55,15 +54,14 @@ export default function GameFinishedModal({
           <CharadeCountdown />
         </b>
       </p>
-      <div className="w-full flex flex-col sm:flex-row space-between">
+      <div className="w-full flex flex-col space-between">
         <CopyToClipboard text={copyText} onCopy={handleShareResults}>
-          <button className="btn mx-auto my-3">
+          <button className="btn mx-auto my-3 py-1 h-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className="w-6 h-6 mr-2"
-            >
+              className="w-6 h-6 mr-2">
               <path
                 fillRule="evenodd"
                 // eslint-disable-next-line max-len
@@ -74,13 +72,14 @@ export default function GameFinishedModal({
             Share Results
           </button>
         </CopyToClipboard>
-        <button className="btn mx-auto my-3" onClick={comingSoonAction}>
+        <button
+          className="btn mx-auto my-3 h-auto py-1"
+          onClick={comingSoonAction}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-6 h-6"
-          >
+            className="w-6 h-6">
             <path
               fillRule="evenodd"
               // eslint-disable-next-line max-len
@@ -88,8 +87,8 @@ export default function GameFinishedModal({
               clipRule="evenodd"
             />
           </svg>
-          Bonus Round
-          <div className="badge text-blue-500">$0.50</div>
+          Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds
+          <div className="badge text-blue-500">$5</div>
         </button>
       </div>
     </Modal>
