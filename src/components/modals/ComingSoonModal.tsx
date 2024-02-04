@@ -30,14 +30,12 @@ export default function ComingSoonModal({
           className="btn my-3"
           href={"mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"}
           target="_blank"
-          rel="noreferrer"
-        >
+          rel="noreferrer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-6 h-6 mr-2"
-          >
+            className="w-6 h-6 mr-2">
             <path
               fillRule="evenodd"
               // eslint-disable-next-line max-len

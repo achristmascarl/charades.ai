@@ -24,8 +24,7 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
           }
           target="_blank"
           rel="noreferrer"
-          className="text-blue-500 hover:underline"
-        >
+          className="text-blue-500 hover:underline">
           source
         </a>
         ).
@@ -91,8 +90,7 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
           href="https://twitter.com/powerlanguish"
           target="_blank"
           rel="noreferrer"
-          className="text-blue-500"
-        >
+          className="text-blue-500">
           Josh Wardle
         </a>
         ) and, of course, charades.
@@ -101,14 +99,12 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
         className="btn mx-auto my-3"
         href={"mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"}
         target="_blank"
-        rel="noreferrer"
-      >
+        rel="noreferrer">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"
-          className="w-6 h-6 mr-2"
-        >
+          className="w-6 h-6 mr-2">
           <path
             fillRule="evenodd"
             // eslint-disable-next-line max-len

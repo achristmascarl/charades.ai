@@ -11,7 +11,7 @@ export function track(
   category: string,
   label: string,
   value = 0,
-  non_interaction = false
+  non_interaction = false,
 ): void {
   if (process.env.NODE_ENV === "production") {
     window.gtag("event", action, {
@@ -25,7 +25,7 @@ export function track(
       `[${"TRACKING_OFF"}] ` +
         `${action}: category-${category}, ` +
         `label-${label}, value-${value}, ` +
-        `non_interactive-${non_interaction}`
+        `non_interactive-${non_interaction}`,
     );
   }
 }

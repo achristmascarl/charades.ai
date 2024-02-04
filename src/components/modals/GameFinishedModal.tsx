@@ -41,8 +41,7 @@ export default function GameFinishedModal({
       </p>
       <p className="py-2">tune in tomorrow to keep your streak alive:</p>
       <div
-        className={"flex flex-row justify-start space-x-5 align-middle mb-1"}
-      >
+        className={"flex flex-row justify-start space-x-5 align-middle mb-1"}>
         <div>{`🔥 ${winStreak} day win streak`}</div>
         <div>{`✅ ${completionStreak} day completion streak`}</div>
       </div>
@@ -62,8 +61,7 @@ export default function GameFinishedModal({
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className="w-6 h-6 mr-2"
-            >
+              className="w-6 h-6 mr-2">
               <path
                 fillRule="evenodd"
                 // eslint-disable-next-line max-len
@@ -76,14 +74,12 @@ export default function GameFinishedModal({
         </CopyToClipboard>
         <button
           className="btn mx-auto my-3 h-auto py-1"
-          onClick={comingSoonAction}
-        >
+          onClick={comingSoonAction}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-6 h-6"
-          >
+            className="w-6 h-6">
             <path
               fillRule="evenodd"
               // eslint-disable-next-line max-len
