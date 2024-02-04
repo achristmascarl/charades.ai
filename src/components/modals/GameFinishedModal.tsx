@@ -55,9 +55,9 @@ export default function GameFinishedModal({
           <CharadeCountdown />
         </b>
       </p>
-      <div className="w-full flex flex-col sm:flex-row space-between">
+      <div className="w-full flex flex-col space-between">
         <CopyToClipboard text={copyText} onCopy={handleShareResults}>
-          <button className="btn mx-auto my-3">
+          <button className="btn mx-auto my-3 py-1 h-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -74,7 +74,7 @@ export default function GameFinishedModal({
             Share Results
           </button>
         </CopyToClipboard>
-        <button className="btn mx-auto my-3" onClick={comingSoonAction}>
+        <button className="btn mx-auto my-3 h-auto py-1" onClick={comingSoonAction}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -88,8 +88,8 @@ export default function GameFinishedModal({
               clipRule="evenodd"
             />
           </svg>
-          Bonus Round
-          <div className="badge text-blue-500">$0.50</div>
+          Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds
+          <div className="badge text-blue-500">$5</div>
         </button>
       </div>
     </Modal>

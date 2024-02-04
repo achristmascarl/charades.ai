@@ -186,7 +186,14 @@ export default function Home({
     }
   }
 
-  function handleGuess() {
+  function handleGuess(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (
+      guess.length < 1 ||
+      guess.length !== 5 ||
+      gameFinished ||
+      processingGuess
+    ) return;
     if (!wordList.includes(guess)) {
       setShowWordListError(true);
       setTimeout(() => {
@@ -587,7 +594,7 @@ export default function Home({
                 </button>
               </CopyToClipboard>
               <button
-                className="btn mx-auto my-3"
+                className="btn mx-auto my-3 h-auto py-1"
                 onClick={() => {
                   setModalOpenId(modalIDs.ComingSoon);
                   track("click_play_again", "button_click", "coming_soon");
@@ -606,7 +613,7 @@ export default function Home({
                     clipRule="evenodd"
                   />
                 </svg>
-                Bonus Round <div className="badge text-blue-500">$0.50</div>
+                Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds <div className="badge text-blue-500">$0.50</div>
               </button>
             </>
           )}
@@ -791,65 +798,67 @@ export default function Home({
           </p>
         </div>
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
-          <div className="flex flex-row content-center justify-between">
-            <input
-              type="text"
-              placeholder="Type guess here"
-              className={
-                "input input-bordered w-full font-mono tracking-[.45rem]"
-              }
-              onChange={(e) => processInput(e)}
-              value={guess}
-              maxLength={5}
-              disabled={gameFinished || processingGuess}
-              autoCapitalize={"none"}
-              autoComplete={"off"}
-              autoCorrect={"off"}
-              spellCheck={"false"}
-            />
+          <form onSubmit={handleGuess}>
+            <div className="flex flex-row content-center justify-between">
+              <input
+                type="text"
+                placeholder="Type guess here"
+                className={
+                  "input input-bordered w-full font-mono tracking-[.45rem]"
+                }
+                onChange={(e) => processInput(e)}
+                value={guess}
+                maxLength={5}
+                disabled={gameFinished || processingGuess}
+                autoCapitalize={"none"}
+                autoComplete={"off"}
+                autoCorrect={"off"}
+                spellCheck={"false"}
+              />
+              <button
+                className="btn ml-3 sm:block hidden"
+                disabled={
+                  guess.length < 1 ||
+                  guess.length !== 5 ||
+                  gameFinished ||
+                  processingGuess
+                }
+                type="submit"
+              >
+                👈 Guess
+              </button>
+            </div>
+            {guess && guess.length > 0 && (
+              <p className="ml-4 mt-1 text-left">
+                <span className={isIos ? "text-xs" : "text-base"}>
+                  {feedbackEmojis}
+                </span>
+                (
+                <span
+                  className="hover:underline text-blue-500 cursor-pointer"
+                  onClick={() => {
+                    setModalOpenId(modalIDs.Help);
+                    track("click_whats_this", "button_click", "help");
+                  }}
+                >
+                  What&apos;s this?
+                </span>
+                )
+              </p>
+            )}
             <button
-              className="btn ml-3 sm:block hidden"
+              className="btn mx-auto mt-1 sm:hidden"
               disabled={
                 guess.length < 1 ||
                 guess.length !== 5 ||
                 gameFinished ||
                 processingGuess
               }
-              onClick={handleGuess}
+              type="submit"
             >
-              👈 Guess
+              👆 Guess
             </button>
-          </div>
-          {guess && guess.length > 0 && (
-            <p className="ml-4 mt-1 text-left">
-              <span className={isIos ? "text-xs" : "text-base"}>
-                {feedbackEmojis}
-              </span>
-              (
-              <span
-                className="hover:underline text-blue-500 cursor-pointer"
-                onClick={() => {
-                  setModalOpenId(modalIDs.Help);
-                  track("click_whats_this", "button_click", "help");
-                }}
-              >
-                What&apos;s this?
-              </span>
-              )
-            </p>
-          )}
-          <button
-            className="btn mx-auto mt-1 sm:hidden"
-            disabled={
-              guess.length < 1 ||
-              guess.length !== 5 ||
-              gameFinished ||
-              processingGuess
-            }
-            onClick={handleGuess}
-          >
-            👆 Guess
-          </button>
+          </form>
         </div>
         <div className="max-w-md w-full mx-auto text-center flex flex-col mt-3">
           <h3 className="py-3 text-lg">
