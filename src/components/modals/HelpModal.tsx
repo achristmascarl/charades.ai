@@ -97,7 +97,7 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
       </p>
       <a
         className="btn mx-auto my-3"
-        href={"mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"}
+        href={"mailto:carl.z.liu@gmail.com?subject=charades%2Eai%20feedback"}
         target="_blank"
         rel="noreferrer">
         <svg
