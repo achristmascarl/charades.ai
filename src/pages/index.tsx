@@ -858,15 +858,15 @@ export default function Home({
         </div>
         <div className="divider"></div>
         <p className="p-0 text-center">
-          built by a 🐸{" "}
-          (<a
+          built by a 🐸 (
+          <a
             href={`https://www.carl.so/?${referralParams}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-500">
             achristmascarl
-          </a>)
-          .
+          </a>
+          )
         </p>
         <p className="p-0 text-center">
           Copyright © {new Date().getFullYear()}
