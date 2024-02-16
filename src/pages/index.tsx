@@ -494,7 +494,7 @@ export default function Home({
             <span>
               charades.ai is currently on hiatus, so you may have already seen
               the image below. if you&apos;d like to see charades.ai return, let
-              us know by reaching out to chirp@birbstreet.com!
+              us know by reaching out to carl.z.liu@gmail.com!
             </span>
           </div>
         )}
@@ -858,14 +858,14 @@ export default function Home({
         </div>
         <div className="divider"></div>
         <p className="p-0 text-center">
-          built by 🐦s at{" "}
-          <a
-            href={`https://www.birbstreet.com/?${referralParams}`}
+          built by a 🐸{" "}
+          (<a
+            href={`https://www.carl.so/?${referralParams}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-500">
-            Birb Street
-          </a>
+            achristmascarl
+          </a>)
           .
         </p>
         <p className="p-0 text-center">
