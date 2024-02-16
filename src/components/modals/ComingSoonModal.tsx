@@ -15,7 +15,7 @@ export default function ComingSoonModal({
     <Modal id={id} open={open} onChange={onChange}>
       <h3 className="text-lg font-bold">coming soon 👀</h3>
       <p className="py-2">
-        thanks for enjoying the game! we haven&apos;t finished building the
+        thanks for enjoying the game! i haven&apos;t finished building the
         ability to unlock previous rounds, but it&apos;s coming soon along with
         some other features:
       </p>
@@ -23,12 +23,12 @@ export default function ComingSoonModal({
       <p className="ml-2 py-2">🥇 leaderboard for each round</p>
       <p className="ml-2 py-2">🎮 multiplayer with friends</p>
       <p className="py-2">
-        let us know if there&apos;s anything else you&apos;d like to see 👇
+        let me know if there&apos;s anything else you&apos;d like to see 👇
       </p>
       <div className="w-full text-right">
         <a
           className="btn my-3"
-          href={"mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"}
+          href={"mailto:carl.z.liu@gmail.com?subject=charades%2Eai%20feedback"}
           target="_blank"
           rel="noreferrer">
           <svg
