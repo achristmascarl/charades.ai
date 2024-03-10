@@ -5,7 +5,7 @@ import fs from "fs";
 import { answerList, sleep } from "../src/utils.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import { parse } from "ts-command-line-args";
 import sharp from "sharp";
 
@@ -39,10 +39,7 @@ const imageHeight = 256;
       },
     });
 
-    const configuration = new Configuration({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    const openai = new OpenAIApi(configuration);
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const client = await MongoClient.connect(process.env.MONGO_URL ?? "");
     const database = client.db("production");
@@ -84,7 +81,7 @@ const imageHeight = 256;
       const prompt = answerList[promptIndex];
       console.log(prompt);
       let response: any;
-      response = await openai.createImage({
+      response = await openai.images.generate({
         prompt: prompt,
         n: 5,
         size: `${imageWidth}x${imageHeight}`,
@@ -94,7 +91,7 @@ const imageHeight = 256;
         uploadPromises.push(
           new Promise((resolve) => {
             try {
-              const imageUrl = response.data.data[j].url;
+              const imageUrl = response.data[j].url;
               if (!imageUrl) throw new Error("no image url");
               console.log(imageUrl);
               const file = fs.createWriteStream(
