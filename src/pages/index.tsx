@@ -211,15 +211,20 @@ export default function Home({
       }, 3000);
     } else {
       setProcessingGuess(true);
-      const pipeline = (await transformers()).pipeline;
-      const pipe = await pipeline("embeddings");
-      const result = await pipe(guess, {
-        pooling: "mean",
-        normalize: true,
-      });
-      const guessEmbeddings = Array.from(result.flatten().data);
-      const similarityScore = similarity(promptEmbeddings, guessEmbeddings);
-      if (similarityScore === null) {
+      let similarityScore: number;
+      try {
+        const pipeline = (await transformers()).pipeline;
+        const pipe = await pipeline("embeddings");
+        const result = await pipe(guess, {
+          pooling: "mean",
+          normalize: true,
+        });
+        const guessEmbeddings = Array.from(result.flatten().data);
+        const score = similarity(promptEmbeddings, guessEmbeddings);
+        if (score === null) throw new Error("Missing similarity score");
+        similarityScore = score;
+      } catch (err) {
+        console.error(err);
         setShowEmbeddingsError(true);
         setProcessingGuess(false);
         setTimeout(() => {
@@ -228,12 +233,12 @@ export default function Home({
         return;
       }
       let answerEmojiString = "";
-      for (const threshold of [0.2, 0.4, 0.6, 0.8, 0.85]) {
+      for (const threshold of [0.15, 0.3, 0.45, 0.6, 0.8]) {
         if (similarityScore >= threshold) {
           answerEmojiString += "🟩";
         } else if (
-          similarityScore >= threshold - 0.1 ||
-          similarityScore >= 0.82
+          similarityScore >= threshold - 0.075 ||
+          similarityScore >= 0.75
         ) {
           answerEmojiString += "🟨";
         } else {
@@ -252,7 +257,7 @@ export default function Home({
         `guess_${addingNewGuess.length + 1}_${guess}`,
       );
 
-      if (similarityScore >= 0.85) {
+      if (similarityScore >= 0.8) {
         setGameWon(true);
         setGameFinished(true);
         track(
@@ -285,9 +290,7 @@ export default function Home({
       }
       setGuesses(addingNewGuess);
       setGuess("");
-      setTimeout(() => {
-        setProcessingGuess(false);
-      }, 750);
+      setProcessingGuess(false);
     }
   }
 
@@ -343,7 +346,8 @@ export default function Home({
     if (guesses.length > 0) {
       saveGame(guesses, gameFinished, gameWon);
       const cleanUrl = window.location.href.split("#")[0];
-      window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
+      if (!gameFinished)
+        window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
     }
   }, [guesses, gameFinished, gameWon, saveGame]);
 
@@ -540,7 +544,8 @@ export default function Home({
           {gameFinished && (
             <div
               className={
-                "flex flex-row " + "gap-3 pb-3 justify-center align-middle"
+                "flex flex-row flex-wrap " +
+                "gap-3 pb-3 justify-center align-middle"
               }>
               <CopyToClipboard
                 text={getShareString()}
