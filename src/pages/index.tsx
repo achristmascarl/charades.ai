@@ -233,12 +233,12 @@ export default function Home({
         return;
       }
       let answerEmojiString = "";
-      for (const threshold of [0.2, 0.4, 0.6, 0.8, 0.85]) {
+      for (const threshold of [0.15, 0.3, 0.45, 0.6, 0.8]) {
         if (similarityScore >= threshold) {
           answerEmojiString += "🟩";
         } else if (
-          similarityScore >= threshold - 0.1 ||
-          similarityScore >= 0.82
+          similarityScore >= threshold - 0.075 ||
+          similarityScore >= 0.75
         ) {
           answerEmojiString += "🟨";
         } else {
@@ -257,7 +257,7 @@ export default function Home({
         `guess_${addingNewGuess.length + 1}_${guess}`,
       );
 
-      if (similarityScore >= 0.85) {
+      if (similarityScore >= 0.8) {
         setGameWon(true);
         setGameFinished(true);
         track(
