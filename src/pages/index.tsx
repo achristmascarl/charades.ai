@@ -228,10 +228,13 @@ export default function Home({
         return;
       }
       let answerEmojiString = "";
-      for (const threshold of [0.2, 0.4, 0.6, 0.8, 0.99]) {
-        if (similarityScore >= threshold || similarityScore >= 0.91) {
+      for (const threshold of [0.2, 0.4, 0.6, 0.8, 0.85]) {
+        if (similarityScore >= threshold) {
           answerEmojiString += "🟩";
-        } else if (similarityScore >= threshold - 0.1) {
+        } else if (
+          similarityScore >= threshold - 0.1 ||
+          similarityScore >= 0.82
+        ) {
           answerEmojiString += "🟨";
         } else {
           answerEmojiString += "⬜️";
@@ -249,7 +252,7 @@ export default function Home({
         `guess_${addingNewGuess.length + 1}_${guess}`,
       );
 
-      if (similarityScore >= 0.91) {
+      if (similarityScore >= 0.85) {
         setGameWon(true);
         setGameFinished(true);
         track(
