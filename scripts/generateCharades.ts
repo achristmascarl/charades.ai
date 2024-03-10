@@ -8,6 +8,7 @@ import { S3 } from "@aws-sdk/client-s3";
 import OpenAI from "openai";
 import { parse } from "ts-command-line-args";
 import sharp from "sharp";
+import { pipeline } from "@xenova/transformers";
 
 interface Args {
   localPreview?: boolean;
@@ -86,7 +87,9 @@ const imageHeight = 256;
               "You are a fun game designer coming up with prompts " +
               "for a game of charades. The prompts should be 3 to 5 " +
               "words long and describe an interesting visual scene " +
-              "for someone to act out. Only answer with the charade " +
+              "for someone to act out. The prompts should be coherent " +
+              "and easily understandable for players. " +
+              "Only answer with the " +
               "prompts and nothing else. Do not include quotes, " +
               "punctuation, or special characters.",
           },
@@ -101,8 +104,15 @@ const imageHeight = 256;
       if (!prompt?.length)
         throw new Error("prompt was not successfully generated");
       console.log(prompt);
-      let response: any;
-      response = await openai.images.generate({
+      const pipe = await pipeline("embeddings");
+      const embeddings = await pipe(prompt, {
+        pooling: "mean",
+        normalize: true,
+      });
+      const promptEmbeddings: number[] = Array.from(embeddings.flatten().data);
+      console.log("prompt embeddings:");
+      console.log(promptEmbeddings);
+      const response = await openai.images.generate({
         prompt: prompt,
         n: 5,
         size: `${imageWidth}x${imageHeight}`,
@@ -186,6 +196,7 @@ const imageHeight = 256;
           isoDateId: generationInfo[i].isoDateId,
           charadeIndex: generationInfo[i].charadeIndex,
           answer: prompt,
+          promptEmbeddings,
         });
         console.log(`db entry created for prompt ${i}!`);
       }
