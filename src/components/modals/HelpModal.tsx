@@ -45,7 +45,7 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
       <GuessResult
         index={0}
         guesses={[
-          { guessString: "musical kitten", guessEmojis: "🟩🟩🟩🟩🟨 90%" },
+          { guessString: "musical kitten", guessEmojis: "🟩🟩🟩🟩🟨 84%" },
         ]}
         processingGuess={false}
       />
