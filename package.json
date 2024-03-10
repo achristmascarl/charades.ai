@@ -22,6 +22,8 @@
     "act:m1:test": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_next_tests.yml"
   },
   "dependencies": {
+    "@xenova/transformers": "^2.16.0",
+    "compute-cosine-similarity": "^1.1.0",
     "daisyui": "^3.5.1",
     "dotenv": "^16.3.1",
     "mongodb": "^4.11.0",

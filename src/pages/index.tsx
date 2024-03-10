@@ -1,36 +1,27 @@
 import dotenv from "dotenv";
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  ChangeEvent,
-} from "react";
+import React, { useState, useEffect, useCallback, ChangeEvent } from "react";
 import Head from "next/head";
 import Image from "next/future/image";
 import { MongoClient } from "mongodb";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Guess from "../models/Guess";
-import {
-  track,
-  wordList,
-  numGuesses,
-  referralParams,
-  LetterDict,
-  LetterStates,
-} from "../utils";
+import { track, numGuesses, referralParams, percentString } from "../utils";
 import GuessResult from "../components/GuessResult";
 import HelpModal from "../components/modals/HelpModal";
 import ComingSoonModal from "../components/modals/ComingSoonModal";
 import GameFinishedModal from "../components/modals/GameFinishedModal";
 import { placeholderSquareTinyBase64 } from "../../public/blurImages";
 import styles from "../styles/Home.module.css";
+import similarity from "compute-cosine-similarity";
+// lazy load transformers
+const transformers = () => import("@xenova/transformers");
 
 export async function getStaticProps() {
   dotenv.config();
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
+  let promptEmbeddings: number[] = [];
   let client;
 
   let url = process.env.MONGO_URL;
@@ -64,6 +55,20 @@ export async function getStaticProps() {
       if (charade.answer && charade.answer.toString().length > 0) {
         answerString = charade.answer.toString().toLowerCase();
       }
+      if ((charade.promptEmbeddings as number[] | undefined)?.length) {
+        promptEmbeddings = charade.promptEmbeddings;
+      } else {
+        console.log("no prompt embeddings, generating now");
+        const pipeline = (await transformers()).pipeline;
+        const pipe = await pipeline("embeddings");
+        const result = await pipe(answerString, {
+          pooling: "mean",
+          normalize: true,
+        });
+        promptEmbeddings = Array.from(result.flatten().data);
+      }
+      console.log("embeddings:");
+      console.log(promptEmbeddings);
     }
   } catch (err) {
     console.log("error with mongodb: ");
@@ -78,6 +83,7 @@ export async function getStaticProps() {
       charadeIndex,
       answerString,
       charadeId,
+      promptEmbeddings,
     },
     revalidate: 60,
   };
@@ -94,16 +100,17 @@ interface HomeProps {
   charadeIndex: string;
   answerString: string;
   charadeId: string;
+  promptEmbeddings: number[];
 }
 
 export default function Home({
   charadeIndex,
   answerString,
   charadeId,
+  promptEmbeddings,
 }: HomeProps) {
   const [isIos, setIsIos] = useState(false);
   const [guess, setGuess] = useState("");
-  const [feedbackEmojis, setFeedbackEmojis] = useState("");
   const [gameFinished, setGameFinished] = useState(false);
   const [gameWon, setGameWon] = useState(false);
   const [guesses, setGuesses] = useState<Guess[]>([]);
@@ -111,11 +118,9 @@ export default function Home({
   const [completionStreak, setCompletionStreak] = useState(0);
   const [modalOpenId, setModalOpenId] = useState(modalIDs.None);
   const [showCopiedAlert, setShowCopiedAlert] = useState(false);
-  const [showWordListError, setShowWordListError] = useState(false);
+  const [showEmbeddingsError, setShowEmbeddingsError] = useState(false);
   const [showRepeatError, setShowRepeatError] = useState(false);
   const [processingGuess, setProcessingGuess] = useState(false);
-
-  const answerArray = answerString.split("");
 
   const getShareString = useCallback(() => {
     let shareString = `🎭 r${charadeIndex}`;
@@ -187,42 +192,52 @@ export default function Home({
   );
 
   function processInput(e: ChangeEvent<HTMLInputElement>) {
-    if (e.target.value.length <= 5 && /^[a-zA-Z]*$/.test(e.target.value)) {
+    if (e.target.value.length <= 100 && /^[a-zA-Z ]*$/.test(e.target.value)) {
       setGuess(e.target.value.toLowerCase());
     }
   }
 
-  function handleGuess(e: React.FormEvent<HTMLFormElement>) {
+  async function handleGuess(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (guess.length < 1 || gameFinished || processingGuess) return;
     if (
-      guess.length < 1 ||
-      guess.length !== 5 ||
-      gameFinished ||
-      processingGuess
-    )
-      return;
-    if (!wordList.includes(guess)) {
-      setShowWordListError(true);
-      setTimeout(() => {
-        setShowWordListError(false);
-      }, 3000);
-    } else if (guesses.map((guess) => guess.guessString).includes(guess)) {
+      guesses
+        .map((guess) => guess.guessString.toLowerCase())
+        .includes(guess.toLowerCase())
+    ) {
       setShowRepeatError(true);
       setTimeout(() => {
         setShowRepeatError(false);
       }, 3000);
     } else {
       setProcessingGuess(true);
+      const pipeline = (await transformers()).pipeline;
+      const pipe = await pipeline("embeddings");
+      const result = await pipe(guess, {
+        pooling: "mean",
+        normalize: true,
+      });
+      const guessEmbeddings = Array.from(result.flatten().data);
+      const similarityScore = similarity(promptEmbeddings, guessEmbeddings);
+      if (similarityScore === null) {
+        setShowEmbeddingsError(true);
+        setProcessingGuess(false);
+        setTimeout(() => {
+          setShowEmbeddingsError(false);
+        }, 3000);
+        return;
+      }
       let answerEmojiString = "";
-      for (let i = 0; i < guess.length; i++) {
-        if (guess.charAt(i) === answerArray[i]) {
+      for (const threshold of [0.2, 0.4, 0.6, 0.8, 0.99]) {
+        if (similarityScore >= threshold || similarityScore >= 0.91) {
           answerEmojiString += "🟩";
-        } else if (answerArray.includes(guess.charAt(i))) {
+        } else if (similarityScore >= threshold - 0.1) {
           answerEmojiString += "🟨";
         } else {
-          answerEmojiString += "🟥";
+          answerEmojiString += "⬜️";
         }
       }
+      answerEmojiString += ` ${percentString(similarityScore)}`;
       const addingNewGuess = Array.from(guesses);
       addingNewGuess.push({
         guessString: guess.toString(),
@@ -233,7 +248,8 @@ export default function Home({
         "game_state",
         `guess_${addingNewGuess.length + 1}_${guess}`,
       );
-      if (guess.toString() === answerString) {
+
+      if (similarityScore >= 0.91) {
         setGameWon(true);
         setGameFinished(true);
         track(
@@ -294,6 +310,7 @@ export default function Home({
         (window?.navigator?.platform === "MacIntel" &&
           navigator.maxTouchPoints > 1),
     );
+    transformers();
   }, []);
 
   // get game state from localStorage upon render
@@ -326,57 +343,6 @@ export default function Home({
       window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
     }
   }, [guesses, gameFinished, gameWon, saveGame]);
-
-  // memoized letter dict for hints
-  const letterDict = useMemo(() => {
-    const newLetterDict = { ...LetterDict };
-    for (let i = 0; i < guesses.length; i++) {
-      const guess = guesses[i].guessString;
-      for (let j = 0; j < guess.length; j++) {
-        const letter: string = guess.charAt(j);
-        let letterState = LetterStates.NotPresent;
-        if (answerArray.includes(letter)) {
-          letterState =
-            LetterStates[`WrongSpot${j}` as keyof typeof LetterStates];
-        }
-        if (answerArray[j] === letter) {
-          letterState =
-            LetterStates[`CorrectSpot${j}` as keyof typeof LetterStates];
-        }
-        newLetterDict[letter as keyof typeof LetterDict].push(letterState);
-      }
-    }
-    return newLetterDict;
-  }, [guesses, answerArray]);
-
-  // set emojis for feedback and answer (what is stored in guesses)
-  useEffect(() => {
-    let feedbackEmojiString = "";
-    for (let i = 0; i < guess.length; i++) {
-      if (
-        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
-          LetterStates[`CorrectSpot${i}` as keyof typeof LetterStates],
-        )
-      ) {
-        feedbackEmojiString += "🟩";
-      } else if (
-        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
-          LetterStates[`WrongSpot${i}` as keyof typeof LetterStates],
-        )
-      ) {
-        feedbackEmojiString += "🟨";
-      } else if (
-        letterDict[guess.charAt(i) as keyof typeof LetterDict].includes(
-          LetterStates.NotPresent,
-        )
-      ) {
-        feedbackEmojiString += "🟥";
-      } else {
-        feedbackEmojiString += "⬜";
-      }
-    }
-    setFeedbackEmojis(feedbackEmojiString);
-  }, [guess, letterDict]);
 
   return (
     <>
@@ -448,7 +414,7 @@ export default function Home({
               </span>
             </div>
           )}
-          {showWordListError && (
+          {showEmbeddingsError && (
             <div className="alert alert-error flex flex-row">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -464,7 +430,7 @@ export default function Home({
                 />
               </svg>
               <span className="whitespace-normal text-left">
-                Guess not in word list, please try again.
+                Error comparing guess to answer, please try again in a moment.
               </span>
             </div>
           )}
@@ -569,11 +535,14 @@ export default function Home({
             )}
           </h3>
           {gameFinished && (
-            <>
+            <div
+              className={
+                "flex flex-row " + "gap-3 pb-3 justify-center align-middle"
+              }>
               <CopyToClipboard
                 text={getShareString()}
                 onCopy={handleShareResults}>
-                <button className="btn mx-2 my-3">
+                <button className="btn">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -590,27 +559,14 @@ export default function Home({
                 </button>
               </CopyToClipboard>
               <button
-                className="btn mx-auto my-3 h-auto py-1"
+                className="btn"
                 onClick={() => {
                   setModalOpenId(modalIDs.ComingSoon);
-                  track("click_unlock_previous", "button_click", "coming_soon");
+                  track("click_play_again", "button_click", "coming_soon");
                 }}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-6 h-6">
-                  <path
-                    fillRule="evenodd"
-                    // eslint-disable-next-line max-len
-                    d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Unlock {`${parseInt(charadeIndex) - 1}`} Previous Rounds{" "}
-                <div className="badge text-blue-500">$0.50</div>
+                <div className="badge text-blue-500">$0.50</div> Play Again
               </button>
-            </>
+            </div>
           )}
           <div
             className={
@@ -784,12 +740,10 @@ export default function Home({
               <input
                 type="text"
                 placeholder="Type guess here"
-                className={
-                  "input input-bordered w-full font-mono tracking-[.45rem]"
-                }
+                className={"input input-bordered w-full font-mono"}
                 onChange={(e) => processInput(e)}
                 value={guess}
-                maxLength={5}
+                maxLength={100}
                 disabled={gameFinished || processingGuess}
                 autoCapitalize={"none"}
                 autoComplete={"off"}
@@ -800,7 +754,7 @@ export default function Home({
                 className="btn ml-3 sm:block hidden"
                 disabled={
                   guess.length < 1 ||
-                  guess.length !== 5 ||
+                  guess.length > 100 ||
                   gameFinished ||
                   processingGuess
                 }
@@ -808,28 +762,11 @@ export default function Home({
                 👈 Guess
               </button>
             </div>
-            {guess && guess.length > 0 && (
-              <p className="ml-4 mt-1 text-left">
-                <span className={isIos ? "text-xs" : "text-base"}>
-                  {feedbackEmojis}
-                </span>
-                (
-                <span
-                  className="hover:underline text-blue-500 cursor-pointer"
-                  onClick={() => {
-                    setModalOpenId(modalIDs.Help);
-                    track("click_whats_this", "button_click", "help");
-                  }}>
-                  What&apos;s this?
-                </span>
-                )
-              </p>
-            )}
             <button
               className="btn mx-auto mt-1 sm:hidden"
               disabled={
                 guess.length < 1 ||
-                guess.length !== 5 ||
+                guess.length > 100 ||
                 gameFinished ||
                 processingGuess
               }
@@ -888,7 +825,7 @@ export default function Home({
           completionStreak={completionStreak}
           comingSoonAction={() => {
             setModalOpenId(modalIDs.ComingSoon);
-            track("click_unlock_previous", "button_click", "coming_soon");
+            track("click_play_again", "button_click", "coming_soon");
           }}
           copyText={getShareString()}
           handleShareResults={handleShareResults}

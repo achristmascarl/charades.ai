@@ -41,19 +41,9 @@ export const numGuesses = 5;
 export const referralParams =
   "utm_source=charades_ai&utm_medium=referral&utm_campaign=page_links";
 
-export const LetterStates = {
-  NotPresent: "NotPresent",
-  WrongSpot0: "WrongSpot0",
-  WrongSpot1: "WrongSpot1",
-  WrongSpot2: "WrongSpot2",
-  WrongSpot3: "WrongSpot3",
-  WrongSpot4: "WrongSpot4",
-  CorrectSpot0: "CorrectSpot0",
-  CorrectSpot1: "CorrectSpot1",
-  CorrectSpot2: "CorrectSpot2",
-  CorrectSpot3: "CorrectSpot3",
-  CorrectSpot4: "CorrectSpot4",
-};
+export function percentString(decimal: number): string {
+  return `${(decimal * 100).toFixed(0)}%`;
+}
 
 export const LetterDict = {
   a: [] as string[],
