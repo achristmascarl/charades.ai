@@ -1,6 +1,6 @@
 {
   "name": "charades.ai",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "railway run --service bf8fe035-6790-4d5a-845a-1f5da75383a0 next dev && yarn ts:watch",
@@ -22,11 +22,13 @@
     "act:m1:test": "act --secret-file act.secrets --container-architecture linux/amd64 -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:js-latest -W .github/workflows/cron_next_tests.yml"
   },
   "dependencies": {
+    "@xenova/transformers": "^2.16.0",
+    "compute-cosine-similarity": "^1.1.0",
     "daisyui": "^3.5.1",
     "dotenv": "^16.3.1",
     "mongodb": "^4.11.0",
     "next": "12.3.0",
-    "openai": "^3.3.0",
+    "openai": "^4.28.4",
     "react": "18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "18.2.0",

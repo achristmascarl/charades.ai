@@ -16,10 +16,10 @@ export default function ComingSoonModal({
       <h3 className="text-lg font-bold">coming soon 👀</h3>
       <p className="py-2">
         thanks for enjoying the game! i haven&apos;t finished building the
-        ability to unlock previous rounds, but it&apos;s coming soon along with
-        some other features:
+        ability to play more than one round per day, but it&apos;s coming soon
+        along with some other features:
       </p>
-      <p className="ml-2 py-2">✨ use streaks to unlock previous rounds</p>
+      <p className="ml-2 py-2">✨ use streaks to unlock bonus rounds</p>
       <p className="ml-2 py-2">🥇 leaderboard for each round</p>
       <p className="ml-2 py-2">🎮 multiplayer with friends</p>
       <p className="py-2">
