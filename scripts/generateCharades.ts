@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import https from "https";
 import fs from "fs";
-import { answerList, sleep } from "../src/utils.js";
+import { sleep } from "../src/utils.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { S3 } from "@aws-sdk/client-s3";
 import OpenAI from "openai";
@@ -77,8 +77,29 @@ const imageHeight = 256;
       const id = objectId.toString();
       console.log(objectId);
       console.log(id);
-      const promptIndex = Math.floor(Math.random() * answerList.length);
-      const prompt = answerList[promptIndex];
+      const result = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a fun game designer coming up with prompts " +
+              "for a game of charades. The prompts should be 3 to 5 " +
+              "words long and describe an interesting visual scene " +
+              "for someone to act out. Only answer with the charade " +
+              "prompts and nothing else. Do not include quotes, " +
+              "punctuation, or special characters.",
+          },
+          {
+            role: "user",
+            content: "Please give me a prompt for a round of charades",
+          },
+        ],
+        temperature: 1.9,
+      });
+      const prompt = result.choices[0].message.content;
+      if (!prompt?.length)
+        throw new Error("prompt was not successfully generated");
       console.log(prompt);
       let response: any;
       response = await openai.images.generate({
