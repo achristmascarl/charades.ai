@@ -21,7 +21,7 @@ export async function getStaticProps() {
   let charadeIndex = "0";
   let answerString = "llama";
   let charadeId = "64d867ff4f182b001c69ba6d";
-  let promptEmbeddings: number[] = [];
+  let promptEmbeddings: number[] = Array(384).fill(0);
   let client;
 
   let url = process.env.MONGO_URL;
