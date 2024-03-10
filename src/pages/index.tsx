@@ -540,7 +540,8 @@ export default function Home({
           {gameFinished && (
             <div
               className={
-                "flex flex-row " + "gap-3 pb-3 justify-center align-middle"
+                "flex flex-row flex-wrap " +
+                "gap-3 pb-3 justify-center align-middle"
               }>
               <CopyToClipboard
                 text={getShareString()}
