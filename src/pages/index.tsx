@@ -211,15 +211,20 @@ export default function Home({
       }, 3000);
     } else {
       setProcessingGuess(true);
-      const pipeline = (await transformers()).pipeline;
-      const pipe = await pipeline("embeddings");
-      const result = await pipe(guess, {
-        pooling: "mean",
-        normalize: true,
-      });
-      const guessEmbeddings = Array.from(result.flatten().data);
-      const similarityScore = similarity(promptEmbeddings, guessEmbeddings);
-      if (similarityScore === null) {
+      let similarityScore: number;
+      try {
+        const pipeline = (await transformers()).pipeline;
+        const pipe = await pipeline("embeddings");
+        const result = await pipe(guess, {
+          pooling: "mean",
+          normalize: true,
+        });
+        const guessEmbeddings = Array.from(result.flatten().data);
+        const score = similarity(promptEmbeddings, guessEmbeddings);
+        if (score === null) throw new Error("Missing similarity score");
+        similarityScore = score;
+      } catch (err) {
+        console.error(err);
         setShowEmbeddingsError(true);
         setProcessingGuess(false);
         setTimeout(() => {
@@ -285,9 +290,7 @@ export default function Home({
       }
       setGuesses(addingNewGuess);
       setGuess("");
-      setTimeout(() => {
-        setProcessingGuess(false);
-      }, 750);
+      setProcessingGuess(false);
     }
   }
 
@@ -343,7 +346,8 @@ export default function Home({
     if (guesses.length > 0) {
       saveGame(guesses, gameFinished, gameWon);
       const cleanUrl = window.location.href.split("#")[0];
-      window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
+      if (!gameFinished)
+        window.location.href = cleanUrl + `#pic${guesses.length + 1}`;
     }
   }, [guesses, gameFinished, gameWon, saveGame]);
 
