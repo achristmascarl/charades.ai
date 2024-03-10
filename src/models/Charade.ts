@@ -4,13 +4,12 @@ export default class Charade {
     public answer: string,
     public isoDate: number,
     public isoDateId: string,
+    public promptEmbeddings: number[],
   ) {
-    if (answer.length !== 5) {
-      throw new Error("Answer must be 5 letters long");
-    }
     this.charadeIndex = charadeIndex;
     this.answer = answer;
     this.isoDate = isoDate;
     this.isoDateId = isoDateId;
+    this.promptEmbeddings = promptEmbeddings;
   }
 }
