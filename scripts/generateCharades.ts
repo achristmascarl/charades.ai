@@ -98,7 +98,7 @@ const imageHeight = 256;
             content: "Please give me a prompt for a round of charades",
           },
         ],
-        temperature: 1.9,
+        temperature: 0.8,
       });
       const prompt = result.choices[0].message.content;
       if (!prompt?.length)
@@ -202,7 +202,7 @@ const imageHeight = 256;
       }
       if (args.justOne) break;
       // avoid rate limiting by openai
-      await sleep(60000);
+      await sleep(500);
     }
     console.log(
       `finished generating ${

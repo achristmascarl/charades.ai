@@ -1,4 +1,16 @@
 import { MongoClient } from "mongodb";
+import { parse } from "ts-command-line-args";
+
+interface Args {
+  liveRun?: boolean;
+}
+
+const args = parse<Args>({
+  liveRun: {
+    type: Boolean,
+    optional: true,
+  },
+});
 
 (async () => {
   console.log("Cleaning up legacy rounds...");
@@ -12,9 +24,9 @@ import { MongoClient } from "mongodb";
   const database = client.db("production");
   const charades = database.collection("charades");
 
-  // get charade for today
+  // get charade for tmrw
   const date = new Date(Date.now());
-  date.setUTCHours(date.getUTCHours() - 4);
+  date.setUTCHours(date.getUTCHours() + 20);
   const isoString = date.toISOString();
   const isoDateId = isoString.split("T")[0];
   console.log(isoDateId);
@@ -50,6 +62,7 @@ import { MongoClient } from "mongodb";
   const mostRecentIndex = parseInt(index);
   console.log("most recent index:", mostRecentIndex);
 
+  if (!args.liveRun) process.exit(0);
   // delete legacy rounds
   const allResults = await charades.find().toArray();
   for (const result of allResults) {
