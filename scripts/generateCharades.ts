@@ -116,8 +116,10 @@ const imageHeight = 256;
         if (!previousPrompts.includes(prompt?.toLowerCase().trim()))
           finished = true;
         else {
-          console.log("prompt already exists, retrying...");
           retriesLeft--;
+          console.log("retries left:", retriesLeft);
+          if (retriesLeft === 0) process.exit(1);
+          console.log("prompt already exists, retrying...");
           await sleep(500);
         }
       }
