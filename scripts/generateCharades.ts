@@ -55,6 +55,12 @@ const imageHeight = 256;
       });
     });
     console.log(recentCharades);
+    const allResults = await charades.find().toArray();
+    let previousPrompts: string[] = [];
+    await allResults.forEach((result) => {
+      previousPrompts.push(result.answer?.toLowerCase().trim());
+    });
+    console.log(`Found ${previousPrompts.length} previous prompts`);
     let generationInfo = [];
     for (let i = 1; i < 6; i++) {
       const lastDate = new Date(recentCharades[0].isoDateId);
@@ -78,40 +84,52 @@ const imageHeight = 256;
       const id = objectId.toString();
       console.log(objectId);
       console.log(id);
-      const result = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a fun game designer coming up with prompts " +
-              "for a game of charades. The prompts should be 3 to 5 " +
-              "words long and describe an interesting visual scene " +
-              "for someone to act out. The prompts should be coherent " +
-              "and easily understandable for players. " +
-              "Only answer with the " +
-              "prompts and nothing else. Do not include quotes, " +
-              "punctuation, or special characters.",
-          },
-          {
-            role: "user",
-            content: "Please give me a prompt for a round of charades",
-          },
-        ],
-        temperature: 0.8,
-      });
-      const prompt = result.choices[0].message.content;
-      if (!prompt?.length)
-        throw new Error("prompt was not successfully generated");
-      console.log(prompt);
+      let finished = false;
+      let prompt: string | null = null;
+      let retriesLeft = 5;
+      while (!finished && retriesLeft > 0) {
+        const result = await openai.chat.completions.create({
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a fun game designer coming up with prompts " +
+                "for a game of charades. The prompts should be 3 to 5 " +
+                "words long and describe an interesting visual scene " +
+                "for someone to act out. The prompts should be coherent " +
+                "and easily understandable for players. " +
+                "Only answer with the " +
+                "prompts and nothing else. Do not include quotes, " +
+                "punctuation, or special characters.",
+            },
+            {
+              role: "user",
+              content: "Please give me a prompt for a round of charades",
+            },
+          ],
+          temperature: 0.8,
+        });
+        prompt = result.choices[0].message.content;
+        if (!prompt?.length)
+          throw new Error("prompt was not successfully generated");
+        if (!previousPrompts.includes(prompt?.toLowerCase().trim()))
+          finished = true;
+        else {
+          retriesLeft--;
+          await sleep(500);
+        }
+      }
+      if (!prompt?.length) throw new Error("corrupted prompt");
+      console.log("prompt:", prompt);
       const pipe = await pipeline("embeddings");
       const embeddings = await pipe(prompt, {
         pooling: "mean",
         normalize: true,
       });
       const promptEmbeddings: number[] = Array.from(embeddings.flatten().data);
-      console.log("prompt embeddings:");
-      console.log(promptEmbeddings);
+      console.log("prompt embeddings preview:");
+      console.log(promptEmbeddings.slice(0, 10));
       const response = await openai.images.generate({
         prompt: prompt,
         n: 5,

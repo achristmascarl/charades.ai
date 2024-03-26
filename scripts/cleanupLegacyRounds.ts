@@ -3,11 +3,16 @@ import { parse } from "ts-command-line-args";
 
 interface Args {
   liveRun?: boolean;
+  from?: number;
 }
 
 const args = parse<Args>({
   liveRun: {
     type: Boolean,
+    optional: true,
+  },
+  from: {
+    type: Number,
     optional: true,
   },
 });
@@ -62,17 +67,18 @@ const args = parse<Args>({
   const mostRecentIndex = parseInt(index);
   console.log("most recent index:", mostRecentIndex);
 
-  if (!args.liveRun) process.exit(0);
   // delete legacy rounds
   const allResults = await charades.find().toArray();
   for (const result of allResults) {
     const i = parseInt(result.charadeIndex);
-    if (i >= startIndex) {
+    if (i >= startIndex && (args.from ? i >= args.from : true)) {
       console.log("deleting round", i);
-      const deleteResult = await charades.deleteOne({
-        charadeIndex: result.charadeIndex,
-      });
-      console.log("deleted:", deleteResult);
+      if (args.liveRun) {
+        const deleteResult = await charades.deleteOne({
+          charadeIndex: result.charadeIndex,
+        });
+        console.log("deleted:", deleteResult);
+      }
     }
   }
   process.exit(0);
