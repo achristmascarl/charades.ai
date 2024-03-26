@@ -116,6 +116,7 @@ const imageHeight = 256;
         if (!previousPrompts.includes(prompt?.toLowerCase().trim()))
           finished = true;
         else {
+          console.log("prompt already exists, retrying...");
           retriesLeft--;
           await sleep(500);
         }
