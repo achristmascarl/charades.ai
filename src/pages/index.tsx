@@ -752,8 +752,6 @@ export default function Home({
                 disabled={gameFinished || processingGuess}
                 autoCapitalize={"none"}
                 autoComplete={"off"}
-                autoCorrect={"off"}
-                spellCheck={"false"}
               />
               <button
                 className="btn ml-3 sm:block hidden"
