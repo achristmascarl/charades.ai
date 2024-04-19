@@ -108,7 +108,7 @@ const imageHeight = 256;
               content: "Please give me a prompt for a round of charades",
             },
           ],
-          temperature: 0.8,
+          temperature: 0.85,
         });
         prompt = result.choices[0].message.content;
         if (!prompt?.length)
