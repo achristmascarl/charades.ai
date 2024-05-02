@@ -464,7 +464,7 @@ export default function Home({
             <span>
               charades.ai is currently on hiatus, so you may have already seen
               the image below. if you&apos;d like to see charades.ai return, let
-              us know by reaching out to carl.z.liu@gmail.com!
+              us know by reaching out to charades@carl.so!
             </span>
           </div>
         )}

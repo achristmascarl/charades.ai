@@ -28,7 +28,7 @@ export default function ComingSoonModal({
       <div className="w-full text-right">
         <a
           className="btn my-3"
-          href={"mailto:carl.z.liu@gmail.com?subject=charades%2Eai%20feedback"}
+          href={"mailto:charades@carl.so?subject=charades%2Eai%20feedback"}
           target="_blank"
           rel="noreferrer">
           <svg

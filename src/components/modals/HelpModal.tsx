@@ -57,7 +57,7 @@ export default function HelpModal({ id, open, onChange }: HelpModalProps) {
       <div className="divider my-0"></div>
       <a
         className="btn mx-auto my-3"
-        href={"mailto:carl.z.liu@gmail.com?subject=charades%2Eai%20feedback"}
+        href={"mailto:charades@carl.so?subject=charades%2Eai%20feedback"}
         target="_blank"
         rel="noreferrer">
         <svg
