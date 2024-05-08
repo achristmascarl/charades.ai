@@ -94,18 +94,17 @@ const imageHeight = 256;
             {
               role: "system",
               content:
-                "You are a fun game designer coming up with prompts " +
-                "for a game of charades. The prompts should be 3 to 5 " +
-                "words long and describe an interesting visual scene " +
-                "for someone to act out. The prompts should be coherent " +
-                "and easily understandable for players. " +
+                "You are a creative game designer coming up with prompts " +
+                "for a game of charades. The prompts should be 4 to 6 " +
+                "words long and describe an interesting visual scene or event." +
+                "The prompts should be coherent and easily understandable for players. " +
                 "Only answer with the " +
                 "prompts and nothing else. Do not include quotes, " +
                 "punctuation, or special characters.",
             },
             {
               role: "user",
-              content: "Please give me a prompt for a round of charades",
+              content: "Please provide a prompt for a round of charades",
             },
           ],
           temperature: 0.85,
