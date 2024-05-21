@@ -89,7 +89,7 @@ const imageHeight = 256;
       let retriesLeft = 5;
       while (!finished && retriesLeft > 0) {
         const result = await openai.chat.completions.create({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
