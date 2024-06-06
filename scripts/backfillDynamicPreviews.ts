@@ -15,6 +15,7 @@ import fs from "fs";
 interface Args {
   dryRun?: boolean;
   overwrite?: boolean;
+  startFrom?: number;
 }
 
 const args = parse<Args>({
@@ -24,6 +25,10 @@ const args = parse<Args>({
   },
   overwrite: {
     type: Boolean,
+    optional: true,
+  },
+  startFrom: {
+    type: Number,
     optional: true,
   },
 });
@@ -69,6 +74,7 @@ const imageHeight = 256;
   console.log(`Found ${charadeDocs.length} charades in database`);
   let backfilledCount = 0;
   for (const doc of charadeDocs) {
+    if (args.startFrom && parseInt(doc.charadeIndex) < args.startFrom) continue;
     if (
       args.overwrite ||
       !s3objects.includes(`previews/${doc.charadeIndex}-preview.jpg`)
@@ -79,7 +85,7 @@ const imageHeight = 256;
           new GetObjectCommand({
             Bucket: "charades.ai",
             Key: `images/${doc._id.toString()}.jpg`,
-          })
+          }),
         );
         if (!firstImage.Body) {
           console.log(`No image found for ${doc.charadeIndex}`);
@@ -89,7 +95,7 @@ const imageHeight = 256;
         const mask = Buffer.from(
           `<svg><rect x="0" y="0" width="${imageWidth * 2}" height="${
             imageHeight * 2
-          }" rx="20" ry="20" /></svg>`
+          }" rx="20" ry="20" /></svg>`,
         );
         const modifiedFirstImage = await sharp(Buffer.from(bytes))
           .resize(imageWidth * 2, imageHeight * 2, { fit: "cover" })
@@ -105,7 +111,8 @@ const imageHeight = 256;
             Bucket: "charades.ai",
             Key: `previews/${doc.charadeIndex}-preview.jpg`,
             Body: blob,
-          })
+            ContentType: "image/jpeg",
+          }),
         );
         console.log(`Uploaded preview for ${doc.charadeIndex}`);
         backfilledCount++;

@@ -15,28 +15,27 @@ export default function ComingSoonModal({
     <Modal id={id} open={open} onChange={onChange}>
       <h3 className="text-lg font-bold">coming soon 👀</h3>
       <p className="py-2">
-        thanks for enjoying the game! we haven&apos;t finished building bonus
-        rounds, but it&apos;s coming soon along with some other features:
+        thanks for enjoying the game! i haven&apos;t finished building the
+        ability to play more than one round per day, but it&apos;s coming soon
+        along with some other features:
       </p>
-      <p className="ml-2 py-2">✨ unlock bonus rounds with streaks</p>
-      <p className="ml-2 py-2">🎯 longer prompts for more difficulty</p>
-      <p className="ml-2 py-2">💲 buy packs of bonus rounds</p>
+      <p className="ml-2 py-2">✨ use streaks to unlock bonus rounds</p>
+      <p className="ml-2 py-2">🥇 leaderboard for each round</p>
+      <p className="ml-2 py-2">🎮 multiplayer with friends</p>
       <p className="py-2">
-        let us know if there&apos;s anything else you&apos;d like to see 👇
+        let me know if there&apos;s anything else you&apos;d like to see 👇
       </p>
       <div className="w-full text-right">
         <a
           className="btn my-3"
-          href={"mailto:chirp@birbstreet.com?subject=charades%2Eai%20feedback"}
+          href={"mailto:charades@carl.so?subject=charades%2Eai%20feedback"}
           target="_blank"
-          rel="noreferrer"
-        >
+          rel="noreferrer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="w-6 h-6 mr-2"
-          >
+            className="w-6 h-6 mr-2">
             <path
               fillRule="evenodd"
               // eslint-disable-next-line max-len

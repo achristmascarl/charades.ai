@@ -5,9 +5,7 @@
     "max-len": ["error", { "code": 80 }],
     "prettier/prettier": [
       "error",
-      { "endOfLine": "auto" },
-      { "usePrettierrc": true },
-      { "trailingComma": "all" }
+      { "usePrettierrc": true, "trailingComma": "all", "endOfLine": "auto" }
     ]
   },
   "env": {

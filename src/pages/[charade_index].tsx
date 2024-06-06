@@ -36,17 +36,23 @@ export default function CharadeIndex({ index }: { index: string }) {
           content="play charades with ai! powered by openai's dall·e."
         />
         <meta
+          name="og:description"
+          content="play charades with ai! powered by openai's dall·e."
+        />
+        <meta
           property="og:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${index}-preview.jpg`
+            "https://images.charades.ai/" + `previews/${index}-preview.jpg`
           }
         />
+        <meta property="og:image:type" content="image/jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="twitter:card" content="summary_large_image" />
         <meta
           property="twitter:image"
           content={
-            "https://s3.us-east-2.amazonaws.com/" +
-            `charades.ai/previews/${index}-preview.jpg`
+            "https://images.charades.ai/" + `previews/${index}-preview.jpg`
           }
         />
       </Head>
@@ -68,18 +74,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const database = client.db("production");
   const charades = database.collection("charades");
 
-  // get charade for today
-  const date = new Date(Date.now());
-  date.setUTCHours(date.getUTCHours() - 4);
-  const isoString = date.toISOString();
-  const isoDateId = isoString.split("T")[0];
-  console.log(isoDateId);
-  const query = { isoDateId: isoDateId };
-  console.log(query);
-  const charade = await charades.findOne(query);
-  console.log(charade);
+  // get most recent charade
+  const results = await charades
+    .find()
+    .sort({ isoDate: -1 })
+    .limit(1)
+    .toArray();
+  let index;
+  results.forEach((result) => {
+    console.log(result.charadeIndex);
+    index = result.charadeIndex;
+  });
+  console.log(index);
   await client.close();
-  const mostRecentIndex = parseInt(charade?.charadeIndex ?? "0");
+  const mostRecentIndex = parseInt(index ?? "0");
   const paths = [];
   for (let i = 0; i <= mostRecentIndex; i++) {
     paths.push({ params: { charade_index: i.toString() } });
