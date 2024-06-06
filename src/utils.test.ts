@@ -1,26 +1,9 @@
-import { answerList, wordList } from "./utils";
 import { MongoClient, Db, Collection } from "mongodb";
 import { ListObjectsV2Command, S3, S3ClientConfig } from "@aws-sdk/client-s3";
 import { test, expect, describe, beforeAll, afterAll } from "@jest/globals";
 import Charade from "./models/Charade";
 import dotenv from "dotenv";
 dotenv.config();
-
-test("answer and word lists exists", () => {
-  expect(answerList).toBeTruthy();
-  expect(answerList.length).toBeGreaterThan(0);
-  expect(wordList).toBeTruthy();
-  expect(wordList.length).toBeGreaterThan(0);
-});
-
-test("word list is all 5-letter words", () => {
-  answerList.forEach((answer) => {
-    expect(answer.length).toBe(5);
-  });
-  wordList.forEach((word) => {
-    expect(word.length).toBe(5);
-  });
-});
 
 describe("today's and next 6 rounds of charades valid", () => {
   let client: MongoClient;
@@ -97,6 +80,7 @@ describe("today's and next 6 rounds of charades valid", () => {
         document?.answer,
         document?.isoDate,
         document?.isoDateId,
+        document?.promptEmbeddings,
       );
       const charadeId = document?._id.toString();
       expect(charadeId).toBeTruthy();
@@ -107,8 +91,14 @@ describe("today's and next 6 rounds of charades valid", () => {
       expect(parseInt(charade.charadeIndex)).toBeGreaterThan(0);
       expect(charade.answer).toBeDefined();
       expect(charade.answer).not.toBeNull();
-      expect(charade.answer).toHaveLength(5);
+      expect(charade.answer.length).toBeGreaterThan(0);
+      expect(charade.promptEmbeddings).toBeDefined();
+      expect(charade.promptEmbeddings).not.toBeNull();
+      expect(charade.promptEmbeddings.length).toBe(384);
       expect(s3objects).toContain(`images/${charadeId}.jpg`);
+      expect(s3objects).toContain(
+        `previews/${charade.charadeIndex}-preview.jpg`,
+      );
       for (let i = 1; i < 5; i++) {
         expect(s3objects).toContain(`images/${charadeId}-${i}.jpg`);
       }

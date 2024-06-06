@@ -7,13 +7,13 @@ on:
     branches: ["main"]
 
 jobs:
-  test:
-    name: railway run next tests
+  lint:
+    name: lint
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
 
     steps:
       - name: Checkout
@@ -23,7 +23,29 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+
+      - name: Install packages
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+  test:
+    name: railway run next tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
       - name: Install Railway
         run: npm i -g @railway/cli
