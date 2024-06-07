@@ -132,7 +132,7 @@ export default function Home({
     for (let i = 0; i < guesses.length; i++) {
       shareString += `${guesses[i].guessEmojis} \n`;
     }
-    shareString += `https://charades.ai/${charadeIndex}`;
+    shareString += `https://charades.ai/round/${charadeIndex}`;
     return shareString;
   }, [charadeIndex, guesses, gameWon]);
 

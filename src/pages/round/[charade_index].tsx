@@ -88,9 +88,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
   console.log(index);
   await client.close();
   const mostRecentIndex = parseInt(index ?? "0");
-  const endIndex = mostRecentIndex > 300 ? 300 : mostRecentIndex;
   const paths = [];
-  for (let i = 0; i <= endIndex; i++) {
+  for (let i = 0; i <= mostRecentIndex; i++) {
     paths.push({ params: { charade_index: i.toString() } });
   }
   console.log(paths);
